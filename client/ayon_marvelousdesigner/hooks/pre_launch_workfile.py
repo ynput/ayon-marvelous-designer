@@ -5,10 +5,10 @@ from ayon_core.pipeline import tempdir
 from ayon_marvelousdesigner import MARVELOUS_DESIGNER_HOST_DIR
 
 
-class CreateTempSpmFile(PreLaunchHook):
-    """Create Temp Spm File to SpeedTree.
+class CreateTempZprjFile(PreLaunchHook):
+    """Create Temp Zprj File to Marvelous Designer.
 
-    The temp spm file would be created in SpeedTree prior to
+    The temp zprj file would be created in Marvelous Designer prior to
     the launch of the software if there is no last workfile
 
     Hook `GlobalHostDataHook` must be executed before this hook.
