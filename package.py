@@ -6,11 +6,14 @@ name = "marvelous_designer"
 title = "Marvelous Designer"
 
 # Required: Valid semantic version (https://semver.org/)
-version = "0.0.1"
+version = "0.1.0"
 
 # Name of client code directory imported in AYON launcher
+app_host_name = "marvelousdesigner"
 # - do not specify if there is no client code
-client_dir = "ayon_marvelous_designer"
+
+client_dir = "ayon_marvelousdesigner"
+project_can_override_addon_version = True
 
 # Version compatibility with AYON server
 # ayon_server_version = ">=1.0.7"
