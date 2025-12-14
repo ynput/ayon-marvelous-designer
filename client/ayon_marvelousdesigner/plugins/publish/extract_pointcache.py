@@ -6,17 +6,17 @@ from ayon_core.pipeline import publish, OptionalPyblishPluginMixin
 from ayon_core.pipeline.publish import KnownPublishError
 
 
-class ExtractModel(publish.Extractor, OptionalPyblishPluginMixin):
+class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
     """Extract Geometry in Alembic Format."""
 
     order = pyblish.api.ExtractorOrder - 0.05
-    label = "Extract Model (Alembic)"
+    label = "Extract PointCache (Alembic)"
     hosts = ["marvelousdesigner"]
-    families = ["model"]
+    families = ["model", "pointcache"]
     optional = True
     extension = "abc"
 
-    settings_category = "max"
+    settings_category = "marvelousdesigner"
 
     def process(self, instance):
         if not self.is_active(instance.data):
@@ -68,10 +68,11 @@ class ExtractModel(publish.Extractor, OptionalPyblishPluginMixin):
         return export_api.ExportAlembic(filepath, export_options)
 
 
-class ExtractModelObj(ExtractModel):
+class ExtractPointCacheObj(ExtractPointCache):
     """Extract Geometry in OBJ Format."""
 
     label = "Extract Model (OBJ)"
+    families = ["model"]
     extension = "obj"
 
     @staticmethod
@@ -82,10 +83,11 @@ class ExtractModelObj(ExtractModel):
         return export_api.ExportOBJ(filepath, export_options)
 
 
-class ExtractModelFbx(ExtractModel):
+class ExtractFbx(ExtractPointCache):
     """Extract Geometry in FBX Format."""
 
-    label = "Extract Model (FBX)"
+    label = "Extract PointCache (FBX)"
+    families = ["model", "pointcache"]
     extension = "fbx"
 
     @staticmethod
