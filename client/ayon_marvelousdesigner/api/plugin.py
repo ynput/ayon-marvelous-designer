@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Creator plugin for Marvelous Designer."""
-from ayon_core.pipeline import CreatedInstance, Creator, CreatorError
+from ayon_core.pipeline import CreatedInstance, Creator
 
 from ayon_marvelousdesigner.api.pipeline import (
     get_instances,

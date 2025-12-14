@@ -18,8 +18,6 @@ from ayon_core.pipeline import (
     register_loader_plugin_path,
     registered_host,
 )
-from ayon_core.pipeline.context_tools import version_up_current_workfile
-from ayon_core.settings import get_current_project_settings
 # Ayon Marvelous Designer modules
 from ayon_marvelousdesigner import MARVELOUS_DESIGNER_HOST_DIR
 from ayon_marvelousdesigner.api.ayon_dialog import show_tools_dialog
@@ -75,7 +73,9 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         return [".zprj"]
 
     def save_workfile(self, dst_path=None):
-        filepath = save_workfile(dst_path)
+        filepath = save_workfile(
+            dst_path, self.get_current_workfile()
+        )
         return filepath
 
     def open_workfile(self, filepath):
@@ -99,7 +99,7 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         return metadata.get(AYON_CONTEXT_DATA, {})
 
 
-def imprint(filename, name, namespace, context, loader):
+def containerise(filename, name, namespace, context, loader):
     """Imprint a loaded container with metadata.
 
     Containerisation enables a tracking of version, author and origin
@@ -128,11 +128,15 @@ def imprint(filename, name, namespace, context, loader):
         "objectName": filename
     }
     # save the main_data in a temp folder
+    container_data = ls() or []
+    container_data.append(data)
+    set_metadata(get_current_workfile(), AYON_CONTAINERS, container_data)
 
-# get_instances
-# set_instance,
-# set_instances,
-# remove_instance
+
+def get_current_workfile():
+    """Get the current file path from the host."""
+    host = registered_host()
+    return host.get_current_workfile()
 
 
 def get_ayon_metadata():
@@ -141,8 +145,7 @@ def get_ayon_metadata():
     Returns:
         str : json string for meta data [key - value] list
     """
-    host = registered_host()
-    current_file = host.get_current_workfile()
+    current_file = get_current_workfile()
     # need to convert string to dict
     metadata_str = utility_api.GetAPIMetaData(current_file)
     metadata = json.loads(metadata_str)
@@ -151,8 +154,9 @@ def get_ayon_metadata():
 
 def get_instances():
     """Retrieve all stored instances from the project settings."""
-    ayon_metadata = get_ayon_metadata()
-    return ayon_metadata[AYON_INSTANCES]
+    ayon_metadata = get_ayon_metadata() or {}
+    ayon_instances = ayon_metadata.get(AYON_INSTANCES, {})
+    return list(ayon_instances.values())
 
 
 def ls():
@@ -170,6 +174,9 @@ def set_metadata(current_file: str, data_type: str, data: dict):
         ayon_metadata[AYON_ATTRIBUTE] = {}
 
     # Update metadata safely
+    if data_type not in ayon_metadata[AYON_ATTRIBUTE]:
+        ayon_metadata[AYON_ATTRIBUTE][data_type] = {}
+
     ayon_metadata[AYON_ATTRIBUTE][data_type] = data
 
     # Serialize with optional formatting
@@ -182,14 +189,54 @@ def set_metadata(current_file: str, data_type: str, data: dict):
         print(f"Failed to set metadata for {current_file}: {e}")
 
 
-def set_instances(data, update=True):
-    pass
+def set_instance(instance_id, instance_data, update=False):
+    """Set a single instance into the current file metadata."""
+    set_instances({instance_id: instance_data}, update=update)
 
 
-def save_workfile(filepath=None):
+def set_instances(instance_data_by_id, update=False):
+    """Set multiple instances into the current file metadata.
+
+    Args:
+        instance_data_by_id (dict): instance data mapped by their IDs
+        update (bool, optional): Whether to update existing instances.
+        Defaults to False.
+    """
+    instances = get_instances() or {}
+    for instance_id, instance_data in instance_data_by_id.items():
+        if update:
+            existing_data = instances.get(instance_id, {})
+            existing_data.update(instance_data)
+        else:
+            instances[instance_id] = instance_data
+
+    set_metadata(
+        get_current_workfile(),
+        AYON_INSTANCES,
+        instances
+    )
+
+
+def remove_instance(instance_id):
+    """Helper method to remove the data for a specific container"""
+    instances = get_instances() or {}
+    instances.pop(instance_id, None)
+    set_metadata(
+        get_current_workfile(),
+        AYON_INSTANCES,
+        instances
+    )
+
+
+def save_workfile(filepath=None, current_file=None):
+    # migrate ayon-relevant data
+    # from prev workfile to new one
+    metadata_str = utility_api.GetAPIMetaData(current_file)
     export_api.ExportZPrj(filepath)
+    utility_api.SetAPIMetaData(filepath, metadata_str)
     open_workfile(filepath)
     return filepath
+
 
 def open_workfile(filepath):
     import_options = ApiTypes.ImportZPRJOption()
