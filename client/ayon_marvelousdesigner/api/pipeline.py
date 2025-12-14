@@ -32,6 +32,7 @@ PUBLISH_PATH = os.path.join(PLUGINS_DIR, "publish")
 LOAD_PATH = os.path.join(PLUGINS_DIR, "load")
 
 # AYON metadata keys
+AYON_ATTRIBUTE = "ayon"
 AYON_INSTANCES = "ayon_instances"
 AYON_CONTAINERS = "ayon_containers"
 AYON_CONTEXT_DATA = "ayon_context_data"
@@ -84,20 +85,17 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         return os.environ["AYON_CURRENT_WORKFILE"]
 
     def get_containers(self):
-        return []
+        return ls()
 
     def update_context_data(self, data, changes):
-        ayon_metadata = get_ayon_metadata()
-        context_data = ayon_metadata.get(AYON_CONTEXT_DATA, {})
-        context_data.update(data)
         set_metadata(
             self.get_current_workfile(),
             AYON_CONTEXT_DATA,
-            context_data
+            data
         )
 
     def get_context_data(self):
-        metadata = get_ayon_metadata()
+        metadata = get_ayon_metadata() or {}
         return metadata.get(AYON_CONTEXT_DATA, {})
 
 
@@ -146,8 +144,9 @@ def get_ayon_metadata():
     host = registered_host()
     current_file = host.get_current_workfile()
     # need to convert string to dict
-    metadata = utility_api.GetAPIMetaData(current_file)
-    return json.loads(metadata)
+    metadata_str = utility_api.GetAPIMetaData(current_file)
+    metadata = json.loads(metadata_str)
+    return metadata.get(AYON_ATTRIBUTE, {})
 
 
 def get_instances():
@@ -157,17 +156,31 @@ def get_instances():
 
 
 def ls():
-    """List all AYON instances in the current file metadata."""
-    ayon_metadata = get_ayon_metadata()
-    return ayon_metadata.get(AYON_CONTAINERS, {})
+    """List all AYON containers in the current file metadata."""
+    ayon_metadata = get_ayon_metadata() or {}
+    return ayon_metadata.get(AYON_CONTAINERS, [])
 
 
 def set_metadata(current_file: str, data_type: str, data: dict):
     """Set instance data into the current file metadata."""
-    ayon_metadata = get_ayon_metadata()
-    ayon_metadata[data_type] = data
-    json_to_str_data = json.dumps(ayon_metadata)
-    utility_api.SetAPIMetaData(current_file, json_to_str_data)
+    ayon_metadata = get_ayon_metadata() or {}
+
+    # Ensure AYON_ATTRIBUTE key exists
+    if AYON_ATTRIBUTE not in ayon_metadata:
+        ayon_metadata[AYON_ATTRIBUTE] = {}
+
+    # Update metadata safely
+    ayon_metadata[AYON_ATTRIBUTE][data_type] = data
+
+    # Serialize with optional formatting
+    json_to_str_data = f"{json.dumps(ayon_metadata)}"
+
+    try:
+        utility_api.SetAPIMetaData(current_file, json_to_str_data)
+    except Exception as e:
+        # Log or handle the error gracefully
+        print(f"Failed to set metadata for {current_file}: {e}")
+
 
 def set_instances(data, update=True):
     pass
@@ -180,5 +193,5 @@ def save_workfile(filepath=None):
 
 def open_workfile(filepath):
     import_options = ApiTypes.ImportZPRJOption()
-    import_api.importZprj(filepath, import_options)
+    import_api.ImportZprj(filepath, import_options)
     os.environ["AYON_CURRENT_WORKFILE"] = filepath

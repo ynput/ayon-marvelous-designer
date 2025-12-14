@@ -25,7 +25,7 @@ class CreateTempZprjFile(PreLaunchHook):
             self.log.info("It is set to start last workfile on start.")
         else:
             source_template_file = os.path.join(
-                MARVELOUS_DESIGNER_HOST_DIR, "default_zprj", "Default_MD.zprj"
+                MARVELOUS_DESIGNER_HOST_DIR, "default_zprj", "Untitled_MD.zprj"
             )
             staging_dir = tempdir.get_temp_dir(
                 self.data["project_name"],
