@@ -3,7 +3,7 @@
 from ayon_core.pipeline import CreatedInstance, Creator
 
 from ayon_marvelousdesigner.api.pipeline import (
-    get_instances,
+    get_instances_values,
     set_instance,
     set_instances,
     remove_instance
@@ -23,7 +23,7 @@ class MDCreator(Creator):
         )
 
     def collect_instances(self):
-        for instance in get_instances():
+        for instance in get_instances_values():
             if (instance.get("creator_identifier") == self.identifier or
                     instance.get("productType") == self.product_type):
                 self.create_instance_in_context_from_existing(instance)

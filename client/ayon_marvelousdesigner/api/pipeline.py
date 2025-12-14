@@ -157,6 +157,12 @@ def get_instances():
     return ayon_metadata.get(AYON_INSTANCES, {})
 
 
+def get_instances_values():
+    """Retrieve all stored instances from the project settings."""
+    ayon_instances = get_instances()
+    return list(ayon_instances.values())
+
+
 def ls():
     """List all AYON containers in the current file metadata."""
     ayon_metadata = get_ayon_metadata() or {}
