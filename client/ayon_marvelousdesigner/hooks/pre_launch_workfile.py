@@ -34,6 +34,7 @@ class CreateTempZprjFile(PreLaunchHook):
             spm_filename = os.path.basename(source_template_file)
             last_workfile = os.path.join(staging_dir, spm_filename)
             shutil.copyfile(source_template_file, last_workfile)
+            self.launch_context.env["AYON_TEMP_DIR"] = staging_dir
 
         self.launch_context.launch_args.append(last_workfile)
 

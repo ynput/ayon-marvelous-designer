@@ -16,6 +16,7 @@ from ayon_core.host import HostBase, ILoadHost, IPublishHost, IWorkfileHost
 from ayon_core.pipeline import (
     AYON_CONTAINER_ID,
     register_loader_plugin_path,
+    register_creator_plugin_path,
     registered_host,
 )
 # Ayon Marvelous Designer modules
@@ -28,6 +29,7 @@ log = logging.getLogger("ayon_marvelousdesigner")
 PLUGINS_DIR = os.path.join(MARVELOUS_DESIGNER_HOST_DIR, "plugins")
 PUBLISH_PATH = os.path.join(PLUGINS_DIR, "publish")
 LOAD_PATH = os.path.join(PLUGINS_DIR, "load")
+CREATE_PATH = os.path.join(PLUGINS_DIR, "create")
 
 # AYON metadata keys
 AYON_ATTRIBUTE = "ayon"
@@ -53,14 +55,11 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
     def install(self):
         pyblish.api.register_host("marvelousdesigner")
 
-        pyblish.api.register_plugin_path(PUBLISH_PATH)
-        register_loader_plugin_path(LOAD_PATH)
-
-        # log.info("Installing callbacks ... ")
-        # self._register_callbacks()
+        pyblish.api.register_plugin_path(str(PUBLISH_PATH))
+        register_loader_plugin_path(str(LOAD_PATH))
+        register_creator_plugin_path(str(CREATE_PATH))
 
         log.info("Installing menu ... ")
-        # need to figure out some other ways to deploy the menu
 
         self._has_been_setup = True
 
@@ -155,8 +154,7 @@ def get_ayon_metadata():
 def get_instances():
     """Retrieve all stored instances from the project settings."""
     ayon_metadata = get_ayon_metadata() or {}
-    ayon_instances = ayon_metadata.get(AYON_INSTANCES, {})
-    return list(ayon_instances.values())
+    return ayon_metadata.get(AYON_INSTANCES, {})
 
 
 def ls():
