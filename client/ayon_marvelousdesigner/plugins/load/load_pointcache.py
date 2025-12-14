@@ -1,17 +1,19 @@
+
+# -*- coding: utf-8 -*-
 import os
 from typing import Union
 import import_api
 import ApiTypes
 from ayon_core.pipeline import load
-from ayon_core.pipeline.load import LoaderError
+from ayon_core.pipeline.load import LoadError
 from ayon_marvelousdesigner.api.pipeline import containerise
 
 
 class LoadPointCache(load.LoaderPlugin):
     """Load Pointcache for project"""
 
-    product_types = {"pointcache", "model"}
-    representations = {"*"}
+    product_types = {"*"}
+    representations = {"abc", "fbx", "obj"}
 
     label = "Load Pointcache"
     order = -10
@@ -55,7 +57,7 @@ class LoadPointCache(load.LoaderPlugin):
         elif extension == ".obj":
             import_api.ImportOBJ(filepath, options)
         else:
-            raise LoaderError(
+            raise LoadError(
                 f"Unsupported pointcache format: {extension}"
             )
 
@@ -73,6 +75,6 @@ class LoadPointCache(load.LoaderPlugin):
         if extension in {".fbx", ".obj"}:
             return ApiTypes.ImportExportOption()
 
-        raise LoaderError(
+        raise LoadError(
             f"Unsupported pointcache format: {extension}"
         )

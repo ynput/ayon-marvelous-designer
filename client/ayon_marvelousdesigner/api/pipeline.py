@@ -152,8 +152,6 @@ def get_ayon_metadata():
 def get_instances():
     """Retrieve all stored instances from the project settings."""
     ayon_metadata = get_ayon_metadata()
-    if not ayon_metadata:
-        ayon_metadata = {}
     return ayon_metadata.get(AYON_INSTANCES, {})
 
 
@@ -172,8 +170,6 @@ def ls():
 def set_metadata(current_file: str, data_type: str, data: dict):
     """Set instance data into the current file metadata."""
     ayon_metadata = get_ayon_metadata()
-    if not ayon_metadata:
-        ayon_metadata = {}
     # Ensure AYON_ATTRIBUTE key exists
     if AYON_ATTRIBUTE not in ayon_metadata:
         ayon_metadata[AYON_ATTRIBUTE] = {}
@@ -210,8 +206,6 @@ def set_instances(instance_data_by_id, update=False):
         Defaults to False.
     """
     instances = get_instances()
-    if not isinstance(instances, dict):
-        instances = {}
     for instance_id, instance_data in instance_data_by_id.items():
         if update:
             existing_data = instances.get(instance_id, {})
