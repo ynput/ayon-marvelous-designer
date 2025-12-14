@@ -25,8 +25,15 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         stagingdir = self.staging_dir(instance)
         filename = f"{instance.name}.{self.extension}"
         filepath = os.path.join(stagingdir, filename)
-        export_options = ApiTypes.ImportExportOption()
-        output_file = self._export_mesh(filepath, export_options)
+        export_option = ApiTypes.ImportExportOption()
+        export_option.bExportGarment = True
+        export_option.bExportAvatar = False
+        export_option.bSingleObject = True
+        export_option.bExportAnimation = (
+            instance.data["productType"] != "model"
+        )
+
+        output_file = self._export_mesh(filepath, export_option)
         if not os.path.exists(output_file):
             msg = (
                 f"File {output_file} wasn't produced by Marvelous Designer, "
