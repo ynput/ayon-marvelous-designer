@@ -59,8 +59,6 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         register_loader_plugin_path(str(LOAD_PATH))
         register_creator_plugin_path(str(CREATE_PATH))
 
-        log.info("Installing menu ... ")
-
         self._has_been_setup = True
 
     def workfile_has_unsaved_changes(self):
@@ -153,7 +151,9 @@ def get_ayon_metadata():
 
 def get_instances():
     """Retrieve all stored instances from the project settings."""
-    ayon_metadata = get_ayon_metadata() or {}
+    ayon_metadata = get_ayon_metadata()
+    if not ayon_metadata:
+        ayon_metadata = {}
     return ayon_metadata.get(AYON_INSTANCES, {})
 
 
@@ -171,17 +171,20 @@ def ls():
 
 def set_metadata(current_file: str, data_type: str, data: dict):
     """Set instance data into the current file metadata."""
-    ayon_metadata = get_ayon_metadata() or {}
-
+    ayon_metadata = get_ayon_metadata()
+    if not ayon_metadata:
+        ayon_metadata = {}
     # Ensure AYON_ATTRIBUTE key exists
     if AYON_ATTRIBUTE not in ayon_metadata:
         ayon_metadata[AYON_ATTRIBUTE] = {}
 
     # Update metadata safely
-    if data_type not in ayon_metadata[AYON_ATTRIBUTE]:
-        ayon_metadata[AYON_ATTRIBUTE][data_type] = {}
-
-    ayon_metadata[AYON_ATTRIBUTE][data_type] = data
+    if isinstance(data, dict) and (
+        isinstance(ayon_metadata[AYON_ATTRIBUTE].get(data_type), dict)
+    ):
+        ayon_metadata[AYON_ATTRIBUTE][data_type].update(data)
+    else:
+        ayon_metadata[AYON_ATTRIBUTE][data_type] = data
 
     # Serialize with optional formatting
     json_to_str_data = f"{json.dumps(ayon_metadata)}"
@@ -206,7 +209,9 @@ def set_instances(instance_data_by_id, update=False):
         update (bool, optional): Whether to update existing instances.
         Defaults to False.
     """
-    instances = get_instances() or {}
+    instances = get_instances()
+    if not isinstance(instances, dict):
+        instances = {}
     for instance_id, instance_data in instance_data_by_id.items():
         if update:
             existing_data = instances.get(instance_id, {})
@@ -223,7 +228,7 @@ def set_instances(instance_data_by_id, update=False):
 
 def remove_instance(instance_id):
     """Helper method to remove the data for a specific container"""
-    instances = get_instances() or {}
+    instances = get_instances()
     instances.pop(instance_id, None)
     set_metadata(
         get_current_workfile(),
