@@ -1,4 +1,5 @@
 import os
+from typing import Union
 import import_api
 import ApiTypes
 from ayon_core.pipeline import load
@@ -31,8 +32,22 @@ class LoadPointCache(load.LoaderPlugin):
             loader=self
         )
 
-    def load_pointcache(self, filepath, extension, options):
-        """Actual loading logic for pointcache."""
+    @staticmethod
+    def load_pointcache(
+        filepath: str,
+        extension: str,
+        options: Union[ApiTypes.ImportAlembicOption,
+                       ApiTypes.ImportExportOption]) -> None:
+        """Actual loading logic for pointcache.
+
+        Args:
+            filepath (str): Path to pointcache file.
+            extension (str): Extension of pointcache file.
+            options (ApiTypes.ImportExportOption): Options for loading.
+
+        Raises:
+            LoaderError: If the pointcache format is unsupported.
+        """
         if extension == ".abc":
             import_api.ImportAlembic(filepath, options)
         elif extension == ".fbx":
@@ -44,13 +59,20 @@ class LoadPointCache(load.LoaderPlugin):
                 f"Unsupported pointcache format: {extension}"
             )
 
-    def load_options(self, extension):
-        """Return options for loading pointcache."""
+    @staticmethod
+    def load_options(extension: str) -> Union[
+            ApiTypes.ImportAlembicOption, ApiTypes.ImportExportOption]:
+        """Return options for loading pointcache.
+        
+        Raises:
+            LoaderError: If the pointcache format is unsupported.
+        """
         if extension == ".abc":
             return ApiTypes.ImportAlembicOption()
-        elif extension == ".fbx" or extension == ".obj":
+
+        if extension in {".fbx", ".obj"}:
             return ApiTypes.ImportExportOption()
-        else:
-            raise LoaderError(
-                f"Unsupported pointcache format: {extension}"
-            )
+
+        raise LoaderError(
+            f"Unsupported pointcache format: {extension}"
+        )
