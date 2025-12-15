@@ -85,11 +85,7 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         return ls()
 
     def update_context_data(self, data, changes):
-        set_metadata(
-            self.get_current_workfile(),
-            AYON_CONTEXT_DATA,
-            data
-        )
+        set_metadata(AYON_CONTEXT_DATA, data)
 
     def get_context_data(self):
         metadata = get_ayon_metadata() or {}
@@ -127,7 +123,7 @@ def containerise(filename, name, namespace, context, loader):
     # save the main_data in a temp folder
     container_data = ls() or []
     container_data.append(data)
-    set_metadata(get_current_workfile(), AYON_CONTAINERS, container_data)
+    set_metadata(AYON_CONTAINERS, container_data)
 
 
 def get_current_workfile():
@@ -142,11 +138,9 @@ def get_ayon_metadata():
     Returns:
         str : json string for meta data [key - value] list
     """
-    current_file = get_current_workfile()
     # need to convert string to dict
-    metadata_str = utility_api.GetAPIMetaData(current_file)
-    metadata = json.loads(metadata_str)
-    return metadata.get(AYON_ATTRIBUTE, {})
+    metadata_str = utility_api.GetMetaDataForCurrentGarment()
+    return json.loads(metadata_str)
 
 
 def get_instances():
@@ -167,27 +161,19 @@ def ls():
     return ayon_metadata.get(AYON_CONTAINERS, [])
 
 
-def set_metadata(current_file: str, data_type: str, data: dict):
+def set_metadata(data_type: str, data: dict):
     """Set instance data into the current file metadata."""
     ayon_metadata = get_ayon_metadata()
-    # Ensure AYON_ATTRIBUTE key exists
-    if AYON_ATTRIBUTE not in ayon_metadata:
-        ayon_metadata[AYON_ATTRIBUTE] = {}
+    if data_type not in ayon_metadata:
+        ayon_metadata[data_type] = data
 
-    if data_type not in ayon_metadata[AYON_ATTRIBUTE]:
-        ayon_metadata[AYON_ATTRIBUTE][data_type] = {}
-
-    ayon_metadata[AYON_ATTRIBUTE][data_type] = data
-
-    # Serialize with optional formatting
-    json_to_str_data = f"{json.dumps(ayon_metadata)}"
-
-    try:
-        utility_api.SetAPIMetaData(current_file, json_to_str_data)
-    except Exception as e:
-        # Log or handle the error gracefully
-        print(f"Failed to set metadata for {current_file}: {e}")
-
+        # Serialize with optional formatting
+        json_to_str_data = f"{json.dumps(ayon_metadata)}"
+        utility_api.SetMetaDataForCurrentGarment(json_to_str_data)
+    else:
+        json_to_str_data = f"{json.dumps(data)}"
+        utility_api.ChangeMetaDataValueForCurrentGarment(
+            data_type, json_to_str_data)
 
 def set_instance(instance_id, instance_data, update=False):
     """Set a single instance into the current file metadata."""
@@ -210,22 +196,14 @@ def set_instances(instance_data_by_id, update=False):
         else:
             instances[instance_id] = instance_data
 
-    set_metadata(
-        get_current_workfile(),
-        AYON_INSTANCES,
-        instances
-    )
+    set_metadata(AYON_INSTANCES, instances)
 
 
 def remove_instance(instance_id):
     """Helper method to remove the data for a specific container"""
     instances = get_instances()
     instances.pop(instance_id, None)
-    set_metadata(
-        get_current_workfile(),
-        AYON_INSTANCES,
-        instances
-    )
+    set_metadata(AYON_INSTANCES, instances)
 
 
 def save_workfile(filepath=None, current_file=None):
