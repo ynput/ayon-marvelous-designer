@@ -174,13 +174,10 @@ def set_metadata(current_file: str, data_type: str, data: dict):
     if AYON_ATTRIBUTE not in ayon_metadata:
         ayon_metadata[AYON_ATTRIBUTE] = {}
 
-    # Update metadata safely
-    if isinstance(data, dict) and (
-        isinstance(ayon_metadata[AYON_ATTRIBUTE].get(data_type), dict)
-    ):
-        ayon_metadata[AYON_ATTRIBUTE][data_type].update(data)
-    else:
-        ayon_metadata[AYON_ATTRIBUTE][data_type] = data
+    if data_type not in ayon_metadata[AYON_ATTRIBUTE]:
+        ayon_metadata[AYON_ATTRIBUTE][data_type] = {}
+
+    ayon_metadata[AYON_ATTRIBUTE][data_type] = data
 
     # Serialize with optional formatting
     json_to_str_data = f"{json.dumps(ayon_metadata)}"
