@@ -166,10 +166,10 @@ def set_metadata(data_type: str, data: Union[dict, list]):
     """Set instance data into the current file metadata."""
     ayon_metadata = get_ayon_metadata()
     ayon_metadata[data_type] = data
-
     # Serialize with optional formatting
     json_to_str_data = f"{json.dumps(ayon_metadata)}"
     utility_api.SetMetaDataForCurrentGarment(json_to_str_data)
+
 
 def set_instance(instance_id, instance_data, update=False):
     """Set a single instance into the current file metadata."""
