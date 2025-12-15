@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+from typing import Union
 
 # Marvelous Designer modules
 import ApiTypes
@@ -161,19 +162,14 @@ def ls():
     return ayon_metadata.get(AYON_CONTAINERS, [])
 
 
-def set_metadata(data_type: str, data: dict):
+def set_metadata(data_type: str, data: Union[dict, list]):
     """Set instance data into the current file metadata."""
     ayon_metadata = get_ayon_metadata()
-    if data_type not in ayon_metadata:
-        ayon_metadata[data_type] = data
+    ayon_metadata[data_type] = data
 
-        # Serialize with optional formatting
-        json_to_str_data = f"{json.dumps(ayon_metadata)}"
-        utility_api.SetMetaDataForCurrentGarment(json_to_str_data)
-    else:
-        json_to_str_data = f"{json.dumps(data)}"
-        utility_api.ChangeMetaDataValueForCurrentGarment(
-            data_type, json_to_str_data)
+    # Serialize with optional formatting
+    json_to_str_data = f"{json.dumps(ayon_metadata)}"
+    utility_api.SetMetaDataForCurrentGarment(json_to_str_data)
 
 def set_instance(instance_id, instance_data, update=False):
     """Set a single instance into the current file metadata."""
