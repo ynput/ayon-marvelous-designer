@@ -37,5 +37,3 @@ class CreateTempZprjFile(PreLaunchHook):
             self.launch_context.env["AYON_TEMP_DIR"] = staging_dir
 
         self.launch_context.launch_args.append(last_workfile)
-
-        self.launch_context.env["AYON_CURRENT_WORKFILE"] = last_workfile

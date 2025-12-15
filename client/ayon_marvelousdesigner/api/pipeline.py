@@ -79,7 +79,7 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         open_workfile(filepath)
 
     def get_current_workfile(self):
-        return os.environ["AYON_CURRENT_WORKFILE"]
+        return utility_api.GetProjectFilePath()
 
     def get_containers(self):
         return ls()
@@ -241,4 +241,3 @@ def save_workfile(filepath=None, current_file=None):
 def open_workfile(filepath):
     import_options = ApiTypes.ImportZPRJOption()
     import_api.ImportZprj(filepath, import_options)
-    os.environ["AYON_CURRENT_WORKFILE"] = filepath
