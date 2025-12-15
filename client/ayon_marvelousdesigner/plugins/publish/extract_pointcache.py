@@ -12,7 +12,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
     order = pyblish.api.ExtractorOrder - 0.05
     label = "Extract PointCache (Alembic)"
     hosts = ["marvelousdesigner"]
-    families = ["model", "pointcache"]
+    families = ["pointcache", "model"]
     optional = True
     extension = "abc"
 
@@ -24,14 +24,10 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
 
         stagingdir = self.staging_dir(instance)
         filename = f"{instance.name}.{self.extension}"
+        xml_filename = f"{instance.name}.xml"
         filepath = os.path.join(stagingdir, filename)
-        export_option = ApiTypes.ImportExportOption()
-        export_option.bExportGarment = True
-        export_option.bExportAvatar = False
-        export_option.bSingleObject = True
-        export_option.bExportAnimation = (
-            instance.data["productType"] != "model"
-        )
+        xml_output = os.path.join(stagingdir, xml_filename)
+        export_option = self.export_option()
 
         output_file = self._export_mesh(filepath, export_option)
         if not os.path.exists(output_file):
@@ -58,8 +54,20 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             "Extracted instance '%s' to: %s" % (instance.name, filepath)
         )
 
-    @staticmethod
+        if os.path.exists(xml_output):
+            xml_representation = {
+                "name": "xml",
+                "ext": "xml",
+                "files": xml_filename,
+                "stagingDir": stagingdir,
+            }
+            instance.data["representations"].append(xml_representation)
+            self.log.info(
+                "Extracted instance '%s' to: %s" % (instance.name, filepath)
+            )
+
     def _export_mesh(
+            self,
             filepath: str,
             export_options: ApiTypes.ImportExportOption
         ) -> str:
@@ -72,22 +80,108 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         Returns:
             str: Output file paths
         """
-        return export_api.ExportAlembic(filepath, export_options)
+        if self.extension == "abc":
+            return export_api.ExportAlembic(filepath, export_options)
+        if self.extension == "fbx":
+            return export_api.ExportFBX(filepath, export_options)
+        if self.extension == "obj":
+            return export_api.ExportOBJ(filepath, export_options)
+        
+        raise KnownPublishError(
+            f"Unsupported export format: {self.extension}"
+        )
+
+    @staticmethod
+    def export_option() -> ApiTypes.ImportExportOption:
+        """Get export options for point cache export.
+
+        Returns:
+            ApiTypes.ImportExportOption: export options
+        """
+        export_option = ApiTypes.ImportExportOption()
+        export_option.bExportGarment = True
+        export_option.bExportAvatar = False
+        export_option.bSingleObject = True
+        export_option.bThin = False
+        export_option.bMetaData = True
+        return export_option
 
 
-class ExtractPointCacheObj(ExtractPointCache):
-    """Extract Geometry in OBJ Format."""
+class ExtractModel(ExtractPointCache):
+    """Extract Model in Obj Format."""
 
-    label = "Extract Model (OBJ)"
+    label = "Extract Model (Obj)"
     families = ["model"]
     extension = "obj"
 
     @staticmethod
-    def _export_mesh(
-            filepath: str,
-            export_options: ApiTypes.ImportExportOption
-        ) -> str:
-        return export_api.ExportOBJ(filepath, export_options)
+    def export_option() -> ApiTypes.ImportExportOption:
+        """Get export options for point cache export.
+
+        Returns:
+            ApiTypes.ImportExportOption: export options
+        """
+        export_option = ApiTypes.ImportExportOption()
+        export_option.bExportGarment = True
+        export_option.bExportAvatar = False
+        export_option.bSingleObject = False
+        export_option.bThin = True
+        export_option.bMetaData = False
+        return export_option
+
+
+class ExtractModelThick(ExtractPointCache):
+    """Extract Geometry in Obj Format."""
+
+    label = "Extract Model Thick (Obj)"
+    families = ["model"]
+    extension = "obj"
+
+    @staticmethod
+    def export_option() -> ApiTypes.ImportExportOption:
+        """Get export options for point cache export.
+
+        Returns:
+            ApiTypes.ImportExportOption: export options
+        """
+        export_option = ApiTypes.ImportExportOption()
+        export_option.bExportGarment = True
+        export_option.bExportAvatar = False
+        export_option.bSingleObject = True
+        export_option.bThin = False
+        export_option.bMetaData = False
+        return export_option
+
+
+class ExtractModelPanel(ExtractPointCache):
+    """Extract Geometry in Obj Format."""
+
+    label = "Extract Model 2D Panel (Obj)"
+    families = ["model"]
+    extension = "obj"
+
+    @staticmethod
+    def export_option() -> ApiTypes.ImportExportOption:
+        """Get export options for point cache export.
+
+        Returns:
+            ApiTypes.ImportExportOption: export options
+        """
+        export_option = ApiTypes.ImportExportOption()
+        export_option.bExportGarment = True
+        export_option.bExportAvatar = False
+        export_option.bSingleObject = True
+        export_option.bThin = False
+        export_option.bMetaData = False
+        return export_option
+
+
+class ExtractPointCacheObj(ExtractPointCache):
+    """Extract PointCache in OBJ Format."""
+
+    label = "Extract PointCache (OBJ)"
+    families = ["pointcache"]
+    extension = "obj"
 
 
 class ExtractFbx(ExtractPointCache):
@@ -96,10 +190,3 @@ class ExtractFbx(ExtractPointCache):
     label = "Extract PointCache (FBX)"
     families = ["model", "pointcache"]
     extension = "fbx"
-
-    @staticmethod
-    def _export_mesh(
-            filepath: str,
-            export_options: ApiTypes.ImportExportOption
-        ) -> str:
-        return export_api.ExportFBX(filepath, export_options)
