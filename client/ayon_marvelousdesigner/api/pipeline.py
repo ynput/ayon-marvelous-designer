@@ -71,8 +71,7 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         return [".zprj"]
 
     def save_workfile(self, dst_path=None):
-        filepath = save_workfile(dst_path)
-        return filepath
+        return save_workfile(dst_path)
 
     def open_workfile(self, filepath):
         open_workfile(filepath)
