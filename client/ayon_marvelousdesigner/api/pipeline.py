@@ -67,11 +67,11 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         return False
 
     def get_workfile_extensions(self):
-        # support .sbsar and .sbsasm for read-only
         return [".zprj"]
 
     def save_workfile(self, dst_path=None):
-        return save_workfile(dst_path)
+        save_workfile(dst_path)
+        return dst_path
 
     def open_workfile(self, filepath):
         open_workfile(filepath)
@@ -202,7 +202,6 @@ def remove_instance(instance_id):
 def save_workfile(filepath):
     export_api.ExportZPrj(filepath)
     open_workfile(filepath)
-    return filepath
 
 
 def open_workfile(filepath):
