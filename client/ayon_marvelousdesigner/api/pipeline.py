@@ -71,9 +71,7 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         return [".zprj"]
 
     def save_workfile(self, dst_path=None):
-        filepath = save_workfile(
-            dst_path, self.get_current_workfile()
-        )
+        filepath = save_workfile(dst_path)
         return filepath
 
     def open_workfile(self, filepath):
@@ -202,12 +200,8 @@ def remove_instance(instance_id):
     set_metadata(AYON_INSTANCES, instances)
 
 
-def save_workfile(filepath=None, current_file=None):
-    # migrate ayon-relevant data
-    # from prev workfile to new one
-    metadata_str = utility_api.GetAPIMetaData(current_file)
+def save_workfile(filepath):
     export_api.ExportZPrj(filepath)
-    utility_api.SetAPIMetaData(filepath, metadata_str)
     open_workfile(filepath)
     return filepath
 
