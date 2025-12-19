@@ -4,33 +4,54 @@
 This module provides LoadPointCache class for loading various point cache formats
 (ABC, FBX, OBJ) into Marvelous Designer through the AYON pipeline.
 """
+from __future__ import annotations
 
-import os
-from typing import Union
-import import_api
+import json
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
+
 import ApiTypes
+import import_api
 from ayon_core.pipeline import load
 from ayon_core.pipeline.load import LoadError
+from ayon_core.pipeline.traits import (
+    FileLocation,
+    Representation,
+)
 from ayon_marvelousdesigner.api.pipeline import containerise
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class LoadPointCache(load.LoaderPlugin):
-    """Load Pointcache for project"""
-
-    product_types = {"*"}
-    representations = {"abc", "fbx", "obj"}
+    """Load Pointcache for project."""
+    product_types: ClassVar[set[str]] = {"*"}
+    representations: ClassVar[set[str]] = {"abc", "fbx", "obj"}
 
     label = "Load Pointcache"
     order = -10
     icon = "code-fork"
     color = "orange"
 
-    def load(self, context, name, namespace, options):
+    def load(self,
+             context: dict,
+             name: Optional[str] = None,
+             namespace: Optional[str] = None,
+             options: Optional[dict] = None) -> None:
         """Load pointcache into the scene."""
-        filepath = self.filepath_from_context(context)
-        extension = os.path.splitext(filepath)[-1].lower()
+        traits_raw = context["representation"].get("traits")
+
+        # construct Representation object from the context
+        representation = Representation.from_dict(
+            name=context["representation"]["name"],
+            representation_id=context["representation"]["id"],
+            trait_data=json.loads(traits_raw),
+        )
+
+        file_path: Path = representation.get_trait(FileLocation).file_path
+        extension = file_path.suffix.lower()
         loaded_options = self.load_options(extension)
-        self.load_pointcache(filepath, extension, loaded_options)
+        self.load_pointcache(file_path, extension, loaded_options)
         containerise(
             name=name,
             namespace=namespace,
@@ -40,38 +61,47 @@ class LoadPointCache(load.LoaderPlugin):
 
     @staticmethod
     def load_pointcache(
-        filepath: str,
+        file_path: Path,
         extension: str,
         options: Union[ApiTypes.ImportAlembicOption,
                        ApiTypes.ImportExportOption]) -> None:
         """Actual loading logic for pointcache.
 
         Args:
-            filepath (str): Path to pointcache file.
+            file_path (Path): Path to pointcache file.
             extension (str): Extension of pointcache file.
             options (ApiTypes.ImportExportOption): Options for loading.
 
         Raises:
-            LoaderError: If the pointcache format is unsupported.
+            LoadError: If the pointcache format is unsupported.
+
         """
         if extension == ".abc":
-            import_api.ImportAlembic(filepath, options)
+            import_api.ImportAlembic(file_path, options)
         elif extension == ".fbx":
-            import_api.ImportFBX(filepath, options)
+            import_api.ImportFBX(file_path, options)
         elif extension == ".obj":
-            import_api.ImportOBJ(filepath, options)
+            import_api.ImportOBJ(file_path, options)
         else:
-            raise LoadError(
-                f"Unsupported pointcache format: {extension}"
-            )
+            msg = f"Unsupported pointcache format: {extension}"
+            raise LoadError(msg)
 
     @staticmethod
     def load_options(extension: str) -> Union[
             ApiTypes.ImportAlembicOption, ApiTypes.ImportExportOption]:
         """Return options for loading pointcache.
-        
+
+        Args:
+            extension (str): Extension of pointcache file.
+
+        Returns:
+            Union[
+                ApiTypes.ImportAlembicOption,
+                ApiTypes.ImportExportOption]: Options for loading.
+
         Raises:
-            LoaderError: If the pointcache format is unsupported.
+            LoadError: If the pointcache format is unsupported.
+
         """
         if extension == ".abc":
             return ApiTypes.ImportAlembicOption()
@@ -79,6 +109,5 @@ class LoadPointCache(load.LoaderPlugin):
         if extension in {".fbx", ".obj"}:
             return ApiTypes.ImportExportOption()
 
-        raise LoadError(
-            f"Unsupported pointcache format: {extension}"
-        )
+        msg = f"Unsupported pointcache format: {extension}"
+        raise LoadError(msg)

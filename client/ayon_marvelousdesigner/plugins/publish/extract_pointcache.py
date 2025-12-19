@@ -3,15 +3,29 @@
 This module provides extractors for exporting geometry and animation data
 in various formats (Alembic, OBJ, FBX) from Marvelous Designer.
 """
+from __future__ import annotations
 
 import os
-from typing import ClassVar, List
+from pathlib import Path
+from typing import ClassVar
 
 import ApiTypes
 import export_api
 import pyblish.api
 from ayon_core.pipeline import OptionalPyblishPluginMixin, publish
-from ayon_core.pipeline.publish import KnownPublishError
+from ayon_core.pipeline.publish import (
+    KnownPublishError,
+    add_trait_representations,
+)
+from ayon_core.pipeline.traits import (
+    FileLocation,
+    Geometry,
+    Persistent,
+    Representation,
+    Spatial,
+    Static,
+    TraitValidationError,
+)
 
 
 class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
@@ -19,8 +33,8 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
 
     order = pyblish.api.ExtractorOrder - 0.05
     label = "Extract PointCache (Alembic)"
-    hosts: ClassVar = ["marvelousdesigner"]
-    families: ClassVar = ["model", "pointcache"]
+    hosts: ClassVar[list[str]] = ["marvelousdesigner"]
+    families: ClassVar[list[str]] = ["model", "pointcache"]
     optional = True
     extension = "abc"
 
@@ -55,31 +69,60 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
                 msg
             )
 
-        if "representations" not in instance.data:
-            instance.data["representations"] = []
-
-        representation = {
-            "name": self.extension,
-            "ext": self.extension,
-            "files": filename,
-            "stagingDir": stagingdir,
-        }
-
-        instance.data["representations"].append(representation)
-        self.log.info(
-            "Extracted instance '%s' to: %s" % (instance.name, filepath)
+        rep = Representation(
+            "pointcache",
+            traits=[
+                Static(),
+                FileLocation(file_path=Path(stagingdir) / filename),
+                Persistent(),
+                Geometry(),
+                Spatial(
+                    up_axis="Y",
+                    handedness="right",
+                    # we should get this from MD settings
+                    meters_per_unit=0.01,
+                ),
+            ],
         )
 
+        try:
+            rep.validate()
+        except TraitValidationError as e:
+            msg = f"Representation {rep.name} is invalid: {e}"
+            self.log.exception(msg)
+        finally:
+            add_trait_representations(instance, [rep])
+
+        self.log.info(
+            "Extracted instance '%: %s' to: %s",
+            instance.name,
+            rep.name,
+            rep.get_trait(FileLocation).file_path)
+
         if os.path.exists(xml_output):
-            xml_representation = {
-                "name": "xml",
-                "ext": "xml",
-                "files": xml_filename,
-                "stagingDir": stagingdir,
-            }
-            instance.data["representations"].append(xml_representation)
+
+            xml_rep = Representation(
+                "xml",
+                traits=[
+                    Static(),
+                    FileLocation(file_path=Path(stagingdir) / xml_filename),
+                    Persistent(),
+                ],
+            )
+
+            try:
+                rep.validate()
+            except TraitValidationError as e:
+                msg = f"Representation {xml_rep.name} is invalid: {e}"
+                self.log.exception(msg)
+            finally:
+                add_trait_representations(instance, [xml_rep])
+
             self.log.info(
-                "Extracted instance '%s' to: %s" % (instance.name, filepath)
+                "Extracted instance '%: %s' to: %s",
+                instance.name,
+                xml_rep.name,
+                xml_rep.get_trait(FileLocation).file_path,
             )
 
     def _export_mesh(
@@ -106,12 +149,12 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         if self.extension == "obj":
             return export_api.ExportOBJ(filepath, export_options)
 
-        raise KnownPublishError(
-            f"Unsupported export format: {self.extension}"
-        )
+        msg = f"Unsupported export format: {self.extension}"
+        raise KnownPublishError(msg)
 
+    @staticmethod
     def export_option(
-            self, instance: pyblish.api.Instance
+            instance: pyblish.api.Instance
         ) -> ApiTypes.ImportExportOption:
         """Get export options for point cache export.
 
