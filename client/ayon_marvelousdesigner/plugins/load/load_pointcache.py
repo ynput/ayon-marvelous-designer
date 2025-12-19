@@ -1,5 +1,10 @@
 
-# -*- coding: utf-8 -*-
+"""Point cache loader plugin for Marvelous Designer integration.
+
+This module provides LoadPointCache class for loading various point cache formats
+(ABC, FBX, OBJ) into Marvelous Designer through the AYON pipeline.
+"""
+
 import os
 from typing import Union
 import import_api
@@ -27,7 +32,6 @@ class LoadPointCache(load.LoaderPlugin):
         loaded_options = self.load_options(extension)
         self.load_pointcache(filepath, extension, loaded_options)
         containerise(
-            filename=os.path.basename(filepath),
             name=name,
             namespace=namespace,
             context=context,

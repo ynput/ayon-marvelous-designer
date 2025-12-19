@@ -46,7 +46,7 @@ class MarvelousDesignerSettings(BaseSettingsModel):
 
 DEFAULT_MD_VALUES: dict[str, Any] = {
     "prelaunch_settings": {
-        "qt_binding_dir": "/Users/Public/Documents/MarvelousDesigner/Configuration/python311/Lib/site-packages",            # noqa
+        "qt_binding_dir": "/Users/Public/Documents/MarvelousDesigner/Configuration/python311/Lib/site-packages",  # noqa: E501
     },
     "publish": {
         "ExtractPointCache": {

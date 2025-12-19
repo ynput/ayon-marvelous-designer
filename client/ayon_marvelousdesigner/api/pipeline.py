@@ -90,7 +90,7 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         return metadata.get(AYON_CONTEXT_DATA, {})
 
 
-def containerise(filename, name, namespace, context, loader):
+def containerise(name, namespace, context, loader, options=None):
     """Imprint a loaded container with metadata.
 
     Containerisation enables a tracking of version, author and origin
@@ -101,11 +101,7 @@ def containerise(filename, name, namespace, context, loader):
         namespace (str): Namespace under which to host container
         context (dict): Asset information
         loader (load.LoaderPlugin): loader instance used to produce container.
-        identifier (str): SDResource identifier
         options (dict): options
-
-    Returns:
-        None
 
     """
     data = {
@@ -116,12 +112,57 @@ def containerise(filename, name, namespace, context, loader):
         "loader": str(loader.__class__.__name__),
         "representation": context["representation"]["id"],
         "project_name": context["project"]["name"],
-        "objectName": filename
+        "objectName": name,
     }
+    if options:
+        fabric_index = options.get("fabricIndex")
+        data["fabricIndex"] = fabric_index
+        data["objectName"] = f"{name}_fabric_{fabric_index}"
+    else:
+        data["objectName"] = name
     # save the main_data in a temp folder
     container_data = ls() or []
     container_data.append(data)
     set_metadata(AYON_CONTAINERS, container_data)
+
+
+def imprint(object_name: str, data: dict) -> None:
+    """Imprint metadata onto an object in the scene.
+
+    Args:
+        object_name (str): Name of the object to imprint metadata on.
+        data (dict): Metadata to imprint.
+    """
+    # Retrieve existing containers
+    container_data = ls()
+    # Find the container for the specified object
+    for container in container_data:
+        if container.get("objectName") == object_name:
+            container.update(data)
+            break
+    else:
+        log.warning(
+            f"No container found for object '{object_name}' to imprint data."
+        )
+        return
+    # Update the metadata
+    set_metadata(AYON_CONTAINERS, container_data)
+
+
+def remove_container_data(object_name: str) -> None:
+    """Remove container data for a specific object in the scene.
+
+    Args:
+        object_name (str): Name of the object whose container data is to be removed.
+    """
+    container_data = ls()
+    # Filter out the container for the specified object
+    updated_containers = [
+        container for container in container_data
+        if container.get("objectName") != object_name
+    ]
+    # Update the metadata
+    set_metadata(AYON_CONTAINERS, updated_containers)
 
 
 def get_current_workfile():
