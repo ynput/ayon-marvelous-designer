@@ -8,6 +8,8 @@ import os
 import sys
 import utility_api
 
+# Clear previously registered widgets to avoid duplicates
+utility_api.DeleteWidgets()
 # We need to add PYTHONPATH to sys.path to ensure Ayon modules are found
 for path in os.environ["PYTHONPATH"].split(os.pathsep):
     if path and path not in sys.path:
