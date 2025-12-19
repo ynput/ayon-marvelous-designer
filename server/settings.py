@@ -27,9 +27,17 @@ class PublishersModel(BaseSettingsModel):
         title="Extract FBX"
     )
 
-
+class PrelaunchModel(BaseSettingsModel):
+    qt_binding_dir: str = SettingsField(
+        default="",
+        title="Qt Binding Directory"
+    )
 class MarvelousDesignerSettings(BaseSettingsModel):
     """Settings for the Marvelous Designer addon."""
+    prelaunch_settings: PrelaunchModel = SettingsField(
+        default_factory=PrelaunchModel,
+        title="Prelaunch Settings"
+    )
     publish: PublishersModel = SettingsField(
         default_factory=PublishersModel,
         title="Publishers"
@@ -37,6 +45,9 @@ class MarvelousDesignerSettings(BaseSettingsModel):
 
 
 DEFAULT_MD_VALUES: dict[str, Any] = {
+    "prelaunch_settings": {
+        "qt_binding_dir": "",
+    },
     "publish": {
         "ExtractPointCache": {
             "enabled": True,
