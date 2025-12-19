@@ -1,8 +1,16 @@
+"""Plugin for extracting point cache data from Marvelous Designer.
+
+This module provides extractors for exporting geometry and animation data
+in various formats (Alembic, OBJ, FBX) from Marvelous Designer.
+"""
+
 import os
-import pyblish.api
-import export_api
+from typing import ClassVar, List
+
 import ApiTypes
-from ayon_core.pipeline import publish, OptionalPyblishPluginMixin
+import export_api
+import pyblish.api
+from ayon_core.pipeline import OptionalPyblishPluginMixin, publish
 from ayon_core.pipeline.publish import KnownPublishError
 
 
@@ -11,14 +19,22 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
 
     order = pyblish.api.ExtractorOrder - 0.05
     label = "Extract PointCache (Alembic)"
-    hosts = ["marvelousdesigner"]
-    families = ["pointcache", "model"]
+    hosts: ClassVar = ["marvelousdesigner"]
+    families: ClassVar = ["model", "pointcache"]
     optional = True
     extension = "abc"
 
-    settings_category = "marvelousdesigner"
+    def process(self, instance: pyblish.api.Instance) -> None:
+        """Process the instance to extract point cache data.
 
-    def process(self, instance):
+        Args:
+            instance (pyblish.api.Instance): The instance to process
+            for extraction.
+
+        Raises:
+            KnownPublishError: If the output file wasn't produced by
+            Marvelous Designer.
+        """
         if not self.is_active(instance.data):
             return
 
@@ -27,7 +43,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         xml_filename = f"{instance.name}.xml"
         filepath = os.path.join(stagingdir, filename)
         xml_output = os.path.join(stagingdir, xml_filename)
-        export_option = self.export_option()
+        export_option = self.export_option(instance)
 
         output_file = self._export_mesh(filepath, export_option)
         if not os.path.exists(output_file):
@@ -79,6 +95,9 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
 
         Returns:
             str: Output file paths
+
+        Raises:
+            KnownPublishError: If the export format is not supported.
         """
         if self.extension == "abc":
             return export_api.ExportAlembic(filepath, export_options)
@@ -86,107 +105,41 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             return export_api.ExportFBX(filepath, export_options)
         if self.extension == "obj":
             return export_api.ExportOBJ(filepath, export_options)
-        
+
         raise KnownPublishError(
             f"Unsupported export format: {self.extension}"
         )
 
-    @staticmethod
-    def export_option() -> ApiTypes.ImportExportOption:
+    def export_option(
+            self, instance: pyblish.api.Instance
+        ) -> ApiTypes.ImportExportOption:
         """Get export options for point cache export.
 
         Returns:
             ApiTypes.ImportExportOption: export options
         """
         export_option = ApiTypes.ImportExportOption()
-        export_option.bExportGarment = True
-        export_option.bExportAvatar = False
-        export_option.bSingleObject = True
-        export_option.bThin = False
-        export_option.bMetaData = True
+        export_option.bExportAnimation = (
+            instance.data["productBaseType"] == "pointcache"
+        )
+        options = instance.data["exportOptions"]
+        export_option.bExportGarment = options.get("bExportGarment", True)
+        export_option.bExportAvatar = options.get("bExportAvatar", False)
+        export_option.bSingleObject = options.get("bSingleObject", True)
+        export_option.bThin = options.get("bThin", False)
+        export_option.bMetaData = options.get("bMetaData", True)
         return export_option
 
 
-class ExtractModel(ExtractPointCache):
-    """Extract Model in Obj Format."""
-
-    label = "Extract Model (Obj)"
-    families = ["model"]
-    extension = "obj"
-
-    @staticmethod
-    def export_option() -> ApiTypes.ImportExportOption:
-        """Get export options for point cache export.
-
-        Returns:
-            ApiTypes.ImportExportOption: export options
-        """
-        export_option = ApiTypes.ImportExportOption()
-        export_option.bExportGarment = True
-        export_option.bExportAvatar = False
-        export_option.bSingleObject = False
-        export_option.bThin = True
-        export_option.bMetaData = False
-        return export_option
-
-
-class ExtractModelThick(ExtractPointCache):
-    """Extract Geometry in Obj Format."""
-
-    label = "Extract Model Thick (Obj)"
-    families = ["model"]
-    extension = "obj"
-
-    @staticmethod
-    def export_option() -> ApiTypes.ImportExportOption:
-        """Get export options for point cache export.
-
-        Returns:
-            ApiTypes.ImportExportOption: export options
-        """
-        export_option = ApiTypes.ImportExportOption()
-        export_option.bExportGarment = True
-        export_option.bExportAvatar = False
-        export_option.bSingleObject = True
-        export_option.bThin = False
-        export_option.bMetaData = False
-        return export_option
-
-
-class ExtractModelPanel(ExtractPointCache):
-    """Extract Geometry in Obj Format."""
-
-    label = "Extract Model 2D Panel (Obj)"
-    families = ["model"]
-    extension = "obj"
-
-    @staticmethod
-    def export_option() -> ApiTypes.ImportExportOption:
-        """Get export options for point cache export.
-
-        Returns:
-            ApiTypes.ImportExportOption: export options
-        """
-        export_option = ApiTypes.ImportExportOption()
-        export_option.bExportGarment = True
-        export_option.bExportAvatar = False
-        export_option.bSingleObject = True
-        export_option.bThin = False
-        export_option.bMetaData = False
-        return export_option
-
-
-class ExtractPointCacheObj(ExtractPointCache):
+class ExtractObj(ExtractPointCache):
     """Extract PointCache in OBJ Format."""
 
-    label = "Extract PointCache (OBJ)"
-    families = ["pointcache"]
+    label = "Extract OBJ"
     extension = "obj"
 
 
 class ExtractFbx(ExtractPointCache):
     """Extract Geometry in FBX Format."""
 
-    label = "Extract PointCache (FBX)"
-    families = ["model", "pointcache"]
+    label = "Extract FBX"
     extension = "fbx"
