@@ -50,8 +50,12 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
 
     @staticmethod
     def show_tools_dialog():
-        """Show tools dialog with actions leading to show other tools."""
-        show_tools_dialog()
+        """Show tools dialog with actions leading to show other tools.
+        
+        Returns:
+            The tools dialog instance.
+        """
+        return show_tools_dialog()
 
     def install(self):
         pyblish.api.register_host("marvelousdesigner")

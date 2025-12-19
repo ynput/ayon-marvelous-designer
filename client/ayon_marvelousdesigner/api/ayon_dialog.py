@@ -109,3 +109,4 @@ class WindowCache:
 def show_tools_dialog():
     if not WindowCache.dialog or not WindowCache.dialog.isVisible():
         WindowCache.show_dialog()
+    return WindowCache.dialog

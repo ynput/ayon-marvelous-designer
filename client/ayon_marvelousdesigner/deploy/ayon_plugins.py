@@ -6,6 +6,7 @@ Plugins -> Plug-in Managers.
 # -*- coding: utf-8 -*-
 import os
 import sys
+import utility_api
 
 # We need to add PYTHONPATH to sys.path to ensure Ayon modules are found
 for path in os.environ["PYTHONPATH"].split(os.pathsep):
@@ -19,4 +20,6 @@ from ayon_marvelousdesigner.api import MarvelousDesignerHost
 
 host = MarvelousDesignerHost()
 install_host(host)
-host.show_tools_dialog()
+dialog = host.show_tools_dialog()
+widget_address = id(dialog)
+utility_api.RegisterWidget(widget_address)
