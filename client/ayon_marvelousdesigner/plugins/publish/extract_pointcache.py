@@ -68,7 +68,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             raise KnownPublishError(
                 msg
             )
-
+        up_axis = self.get_up_axis(export_option)
         rep = Representation(
             "pointcache",
             traits=[
@@ -77,10 +77,9 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
                 Persistent(),
                 Geometry(),
                 Spatial(
-                    up_axis="Y",
+                    up_axis=up_axis,
                     handedness="right",
-                    # we should get this from MD settings
-                    meters_per_unit=0.01,
+                    meters_per_unit=export_option.scale / 100.0,
                 ),
             ],
         )
@@ -172,6 +171,26 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         export_option.bThin = options.get("bThin", False)
         export_option.bMetaData = options.get("bMetaData", True)
         return export_option
+
+    @staticmethod
+    def get_up_axis(
+            export_option: ApiTypes.ImportExportOption
+        ) -> str:
+        """Determine the up axis based on export options.
+
+        Args:
+            export_option (ApiTypes.ImportExportOption): Export options.
+
+        Returns:
+            str: The up axis ("Y" or "Z").
+        """
+        if export_option.axisY == 1:
+            return "Y"
+        if export_option.axisZ == 1:
+            return "Z"
+        if export_option.axisX == 1:
+            return "X"
+        return "Y"  # Default to Y if not specified
 
 
 class ExtractObj(ExtractPointCache):
