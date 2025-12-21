@@ -100,11 +100,11 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             KnownPublishError: If the export format is not supported.
         """
         if self.extension == "abc":
-            return export_api.ExportAlembic(filepath, export_options)
+            return export_api.ExportAlembicW(filepath, export_options)
         if self.extension == "fbx":
-            return export_api.ExportFBX(filepath, export_options)
+            return export_api.ExportFBXW(filepath, export_options)
         if self.extension == "obj":
-            return export_api.ExportOBJ(filepath, export_options)
+            return export_api.ExportOBJW(filepath, export_options)
 
         raise KnownPublishError(
             f"Unsupported export format: {self.extension}"
