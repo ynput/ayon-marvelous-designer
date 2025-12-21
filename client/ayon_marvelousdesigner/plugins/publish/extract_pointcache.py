@@ -46,7 +46,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         export_option = self.export_option(instance)
 
         output_files = self._export_mesh(filepath, export_option)
-        if output_files:
+        if not output_files:
             msg = (
                 f"Files [{output_files}] wasn't produced by Marvelous "
                 "Designer, please check the logs."
