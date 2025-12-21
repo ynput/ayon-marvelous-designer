@@ -6,7 +6,7 @@ import pyblish.api
 from ayon_core.pipeline import publish
 
 
-class ExtractPointCache(publish.Extractor):
+class ExtractZFab(publish.Extractor):
     """Extract Geometry in Alembic Format."""
 
     order = pyblish.api.ExtractorOrder - 0.05
@@ -21,6 +21,8 @@ class ExtractPointCache(publish.Extractor):
         target_fabric_index = instance.data["fabricIndex"]
 
         fabric_api.ExportZFab(filepath, target_fabric_index)
+        if "representations" not in instance.data:
+            instance.data["representations"] = []
 
         representation = {
             "name": "zfab",
