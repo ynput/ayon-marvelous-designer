@@ -29,11 +29,11 @@ class CreateZFab(plugin.MDCreator):
         instance_data(dict): Data associated with the instance.
         pre_create_data(dict): Pre-creation configuration data.
         """
-        instance = self.create_instance_in_context(product_name,
-                                                   instance_data)
-
         if pre_create_data.get("use_selection"):
             instance_data["fabricIndex"] = fabric_api.GetCurrentFabricIndex()
+
+        instance = self.create_instance_in_context(product_name,
+                                                   instance_data)
 
         set_instance(
             instance_id=instance["instance_id"],

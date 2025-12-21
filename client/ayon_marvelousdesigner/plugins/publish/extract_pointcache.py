@@ -119,9 +119,6 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             ApiTypes.ImportExportOption: export options
         """
         export_option = ApiTypes.ImportExportOption()
-        export_option.bExportAnimation = (
-            instance.data["productBaseType"] == "pointcache"
-        )
         options = instance.data["exportOptions"]
         export_option.bExportGarment = options.get("bExportGarment", True)
         export_option.bExportAvatar = options.get("bExportAvatar", False)
