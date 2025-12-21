@@ -59,11 +59,11 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         xml_output = os.path.join(stagingdir, xml_filename)
         export_option = self.export_option(instance)
 
-        output_file = self._export_mesh(filepath, export_option)
-        if not os.path.exists(output_file):
+        output_files = self._export_mesh(filepath, export_option)
+        if output_files:
             msg = (
-                f"File {output_file} wasn't produced by Marvelous Designer, "
-                "please check the logs."
+                f"Files [{output_files}] wasn't produced by Marvelous "
+                "Designer, please check the logs."
             )
             raise KnownPublishError(
                 msg
@@ -161,9 +161,6 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             ApiTypes.ImportExportOption: export options
         """
         export_option = ApiTypes.ImportExportOption()
-        export_option.bExportAnimation = (
-            instance.data["productBaseType"] == "pointcache"
-        )
         options = instance.data["exportOptions"]
         export_option.bExportGarment = options.get("bExportGarment", True)
         export_option.bExportAvatar = options.get("bExportAvatar", False)
