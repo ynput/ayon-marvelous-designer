@@ -60,7 +60,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         export_option = self.export_option(instance)
 
         output_files = self._export_mesh(filepath, export_option)
-        if output_files:
+        if not output_files:
             msg = (
                 f"Files [{output_files}] wasn't produced by Marvelous "
                 "Designer, please check the logs."
@@ -142,11 +142,11 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             KnownPublishError: If the export format is not supported.
         """
         if self.extension == "abc":
-            return export_api.ExportAlembic(filepath, export_options)
+            return export_api.ExportAlembicW(filepath, export_options)
         if self.extension == "fbx":
-            return export_api.ExportFBX(filepath, export_options)
+            return export_api.ExportFBXW(filepath, export_options)
         if self.extension == "obj":
-            return export_api.ExportOBJ(filepath, export_options)
+            return export_api.ExportOBJW(filepath, export_options)
 
         msg = f"Unsupported export format: {self.extension}"
         raise KnownPublishError(msg)
