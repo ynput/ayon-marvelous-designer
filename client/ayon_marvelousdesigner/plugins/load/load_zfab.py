@@ -102,6 +102,7 @@ class LoadZfab(load.LoaderPlugin):
 
             file_path: Path = representation.get_trait(FileLocation).file_path
         else:
-            file_path = Path(self.filepath_from_context(context))
+            filepath = self.filepath_from_context(context)
+            file_path = Path(filepath)
 
         return file_path

@@ -7,7 +7,8 @@ This module provides LoadPointCache class for loading various point cache format
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from pathlib import Path
+from typing import ClassVar, Optional, Union
 
 import ApiTypes
 import import_api
@@ -18,9 +19,6 @@ from ayon_core.pipeline.traits import (
     Representation,
 )
 from ayon_marvelousdesigner.api.pipeline import containerise
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class LoadPointCache(load.LoaderPlugin):
@@ -126,6 +124,7 @@ class LoadPointCache(load.LoaderPlugin):
 
             file_path: Path = representation.get_trait(FileLocation).file_path
         else:
-            file_path = Path(self.filepath_from_context(context))
+            filepath = self.filepath_from_context(context)
+            file_path = Path(filepath)
 
         return file_path
