@@ -43,18 +43,9 @@ class LoadZfab(load.LoaderPlugin):
             options (dict): Additional options for loading.
 
         """
-        traits_raw = context["representation"].get("traits")
+        file_path = self._get_filepath(context)
 
-        # construct Representation object from the context
-        representation = Representation.from_dict(
-            name=context["representation"]["name"],
-            representation_id=context["representation"]["id"],
-            trait_data=json.loads(traits_raw),
-        )
-
-        file_path: Path = representation.get_trait(FileLocation).file_path
-
-        fabric_index = fabric_api.AddFabric(file_path)
+        fabric_index = fabric_api.AddFabric(file_path.as_posix())
         containerise(
             name=name,
             namespace=namespace,
@@ -71,22 +62,12 @@ class LoadZfab(load.LoaderPlugin):
             context (dict): Context dictionary with representation info.
 
         """
-        traits_raw = context["representation"].get("traits")
-
-        # construct Representation object from the context
-        representation = Representation.from_dict(
-            name=context["representation"]["name"],
-            representation_id=context["representation"]["id"],
-            trait_data=json.loads(traits_raw),
-        )
-
-        file_path: Path = representation.get_trait(FileLocation).file_path
+        file_path = self._get_filepath(context)
 
         fabric_index = container.get("fabricIndex")
         if fabric_index is not None:
             fabric_api.ReplaceFabric(fabric_index, file_path.as_posix())
         imprint(container["objectName"], {
-            "filename": file_path.name,
             "representation": context["representation"]["id"],
         })
 
@@ -97,3 +78,30 @@ class LoadZfab(load.LoaderPlugin):
             fabric_api.DeleteFabric(fabric_index)
 
         remove_container_data(container["objectName"])
+
+    def _get_filepath(self, context: dict) -> Path:
+        """Gets filepath with either representation trait or context data.
+
+        For backward compatibility only.
+
+        Args:
+            context (dict): Context dictionary.
+
+        Returns:
+            Path: File path to load.
+
+        """
+        traits_raw = context["representation"].get("traits")
+        if traits_raw is not None:
+            # construct Representation object from the context
+            representation = Representation.from_dict(
+                name=context["representation"]["name"],
+                representation_id=context["representation"]["id"],
+                trait_data=json.loads(traits_raw),
+            )
+
+            file_path: Path = representation.get_trait(FileLocation).file_path
+        else:
+            file_path = Path(self.filepath_from_context(context))
+
+        return file_path

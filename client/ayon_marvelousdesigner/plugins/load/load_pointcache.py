@@ -39,19 +39,10 @@ class LoadPointCache(load.LoaderPlugin):
              namespace: Optional[str] = None,
              options: Optional[dict] = None) -> None:
         """Load pointcache into the scene."""
-        traits_raw = context["representation"].get("traits")
-
-        # construct Representation object from the context
-        representation = Representation.from_dict(
-            name=context["representation"]["name"],
-            representation_id=context["representation"]["id"],
-            trait_data=json.loads(traits_raw),
-        )
-
-        file_path: Path = representation.get_trait(FileLocation).file_path
+        file_path = self._get_filepath(context)
         extension = file_path.suffix.lower()
         loaded_options = self.load_options(extension)
-        self.load_pointcache(file_path, extension, loaded_options)
+        self.load_pointcache(file_path.as_posix(), extension, loaded_options)
         containerise(
             name=name,
             namespace=namespace,
@@ -111,3 +102,30 @@ class LoadPointCache(load.LoaderPlugin):
 
         msg = f"Unsupported pointcache format: {extension}"
         raise LoadError(msg)
+
+    def _get_filepath(self, context: dict) -> Path:
+        """Gets filepath with either representation trait or context data.
+
+        For backward compatibility only.
+
+        Args:
+            context (dict): Context dictionary.
+
+        Returns:
+            Path: File path to load.
+
+        """
+        traits_raw = context["representation"].get("traits")
+        if traits_raw is not None:
+            # construct Representation object from the context
+            representation = Representation.from_dict(
+                name=context["representation"]["name"],
+                representation_id=context["representation"]["id"],
+                trait_data=json.loads(traits_raw),
+            )
+
+            file_path: Path = representation.get_trait(FileLocation).file_path
+        else:
+            file_path = Path(self.filepath_from_context(context))
+
+        return file_path
