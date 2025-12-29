@@ -1,7 +1,15 @@
+"""Pre-launch hook for installing Qt bindings in Marvelous Designer.
+
+This module provides:
+- InstallQtBinding: Pre-launch hook that installs PySide6 to MD's
+  Python environment to enable Qt-based functionality.
+"""
+from __future__ import annotations
+
+import platform
 import subprocess
-import system
 from pathlib import Path
-from typing import Union
+from typing import ClassVar, Union
 
 from ayon_applications import LaunchTypes, PreLaunchHook
 
@@ -9,20 +17,25 @@ from ayon_applications import LaunchTypes, PreLaunchHook
 class InstallQtBinding(PreLaunchHook):
     """Install Qt binding to unreal's python packages."""
 
-    app_groups = {"marvelousdesigner"}
+    app_groups: ClassVar = {"marvelousdesigner"}
     order = 11
-    launch_types = {LaunchTypes.local}
+    launch_types: ClassVar = {LaunchTypes.local}
 
-    def execute(self):
-        platform = system().lower()
-        python_executable = "python" if platform != "windows" else "python.exe"
+    def execute(self) -> None:
+        """Execute the pre-launch hook to install PySide6."""
+        current_platform = platform.system().lower()
+        python_executable = (
+            "python"
+            if current_platform != "windows"
+            else "python.exe"
+        )
         md_setting = self.data["project_settings"]["marvelous_designer"]
         qt_binding_dir = md_setting["prelaunch_settings"].get(
             "qt_binding_dir", "")
         qt_binding_dir = Path(qt_binding_dir)
         if not qt_binding_dir.exists():
             self.log.warning(
-                f"Qt binding directory '{qt_binding_dir}' does not exist."
+                "Qt binding directory '%s' does not exist.", qt_binding_dir
             )
             return
 

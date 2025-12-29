@@ -6,6 +6,7 @@ Plugins -> Plug-in Managers.
 # -*- coding: utf-8 -*-
 import os
 import sys
+
 import utility_api
 
 # Clear previously registered widgets to avoid duplicates

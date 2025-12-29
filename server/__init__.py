@@ -6,7 +6,7 @@ from ayon_server.addons import BaseServerAddon
 from .settings import DEFAULT_MD_VALUES, MarvelousDesignerSettings
 
 
-class MarvelousDesignerSettings(BaseServerAddon):
+class MarvelousDesignerAddon(BaseServerAddon):
     """Add-on class for the server."""
     settings_model: Type[MarvelousDesignerSettings] = MarvelousDesignerSettings
 

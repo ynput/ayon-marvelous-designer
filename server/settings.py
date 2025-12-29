@@ -8,12 +8,14 @@ from ayon_server.settings import (
 
 
 class BasicValidateModel(BaseSettingsModel):
+    """Basic model for publisher settings validation."""
     enabled: bool = SettingsField(title="Enabled")
     optional: bool = SettingsField(title="Optional")
     active: bool = SettingsField(title="Active")
 
 
 class PublishersModel(BaseSettingsModel):
+    """Settings for publishers configuration."""
     ExtractPointCache: BasicValidateModel = SettingsField(
         default_factory=BasicValidateModel,
         title="Extract Point Cache"
@@ -27,11 +29,15 @@ class PublishersModel(BaseSettingsModel):
         title="Extract FBX"
     )
 
+
 class PrelaunchModel(BaseSettingsModel):
+    """Settings for prelaunch configuration."""
     qt_binding_dir: str = SettingsField(
         default="",
         title="Qt Binding Directory"
     )
+
+
 class MarvelousDesignerSettings(BaseSettingsModel):
     """Settings for the Marvelous Designer addon."""
     prelaunch_settings: PrelaunchModel = SettingsField(

@@ -1,3 +1,9 @@
+"""Create Point Cache plugin for Marvelous Designer.
+
+This module contains the CreatePointCache class for creating point cache
+products in Marvelous Designer within the AYON pipeline.
+"""
+
 from ayon_marvelousdesigner.api import plugin
 
 
