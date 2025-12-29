@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
 """Pipeline tools for Ayon Substance Designer integration."""
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -16,14 +17,14 @@ import utility_api
 from ayon_core.host import HostBase, ILoadHost, IPublishHost, IWorkfileHost
 from ayon_core.pipeline import (
     AYON_CONTAINER_ID,
-    register_loader_plugin_path,
     register_creator_plugin_path,
+    register_loader_plugin_path,
     registered_host,
 )
+
 # Ayon Marvelous Designer modules
 from ayon_marvelousdesigner import MARVELOUS_DESIGNER_HOST_DIR
 from ayon_marvelousdesigner.api.ayon_dialog import show_tools_dialog
-
 
 log = logging.getLogger("ayon_marvelousdesigner")
 
@@ -43,21 +44,19 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
     name = "marvelousdesigner"
 
     def __init__(self):
-        super(MarvelousDesignerHost, self).__init__()
+        """Initialize the Marvelous Designer host with default settings."""
+        super().__init__()
         self._has_been_setup = False
         self.callbacks = []
         self.shelves = []
 
     @staticmethod
-    def show_tools_dialog():
-        """Show tools dialog with actions leading to show other tools.
-        
-        Returns:
-            The tools dialog instance.
-        """
-        return show_tools_dialog()
+    def show_tools_dialog() -> None:
+        """Show tools dialog with actions leading to show other tools."""
+        show_tools_dialog()
 
-    def install(self):
+    def install(self) -> None:
+        """Install and register the MD host with Ayon pipeline."""
         pyblish.api.register_host("marvelousdesigner")
 
         pyblish.api.register_plugin_path(str(PUBLISH_PATH))
@@ -66,35 +65,75 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
 
         self._has_been_setup = True
 
-    def workfile_has_unsaved_changes(self):
+    def workfile_has_unsaved_changes(self) -> bool:  # noqa: PLR6301
+        """Check if the current workfile has unsaved changes.
+
+        Returns:
+            bool: True if there are unsaved changes, False otherwise.
+        """
         # API not supported for the check
         return False
 
-    def get_workfile_extensions(self):
+    def get_workfile_extensions(self) -> list[str]:  # noqa: PLR6301
+        """Get the list of supported workfile extensions.
+
+        Returns:
+            list[str]: List of supported workfile extensions.
+        """
         return [".zprj"]
 
-    def save_workfile(self, dst_path=None):
+    def save_workfile(self, dst_path: str | None = None) -> str | None:  # noqa: PLR6301
+        """Save the current workfile to the specified destination path.
+
+        Args:
+            dst_path (str | None, optional): Destination path to save the workfile.
+            Defaults to None.
+
+        Returns:
+            str | None: The path where the workfile was saved, or None
+            if saving failed.
+        """
         save_workfile(dst_path)
         return dst_path
 
-    def open_workfile(self, filepath):
+    def open_workfile(self, filepath: str) -> None:  # noqa: PLR6301
+        """Open a workfile from the specified file path."""
         open_workfile(filepath)
 
-    def get_current_workfile(self):
+    def get_current_workfile(self) -> str:  # noqa: PLR6301
+        """Get the current workfile path from the host.
+
+        Returns:
+            str: The current workfile path.
+        """
         return utility_api.GetProjectFilePath()
 
-    def get_containers(self):
+    def get_containers(self) -> list:  # noqa: PLR6301
+        """Get the list of containers in the current scene.
+
+        Returns:
+            list: List of container metadata dictionaries.
+        """
         return ls()
 
-    def update_context_data(self, data, changes):
+    def update_context_data(self, data: dict, changes: dict) -> None:  # noqa : PLR6301
+        """Update the context data in the current file metadata."""
         set_metadata(AYON_CONTEXT_DATA, data)
 
-    def get_context_data(self):
+    def get_context_data(self) -> dict:  # noqa: PLR6301
+        """Get the context data from the current file metadata.
+
+        Returns:
+            dict: Context data dictionary.
+        """
         metadata = get_ayon_metadata() or {}
         return metadata.get(AYON_CONTEXT_DATA, {})
 
 
-def containerise(name, namespace, context, loader, options=None):
+def containerise(
+        name: str, namespace: str,
+        context: dict, loader: object,
+        options: dict | None = None) -> None:
     """Imprint a loaded container with metadata.
 
     Containerisation enables a tracking of version, author and origin
@@ -146,7 +185,7 @@ def imprint(object_name: str, data: dict) -> None:
             break
     else:
         log.warning(
-            f"No container found for object '{object_name}' to imprint data."
+            "No container found for object %s to imprint data.", object_name
         )
         return
     # Update the metadata
@@ -169,42 +208,54 @@ def remove_container_data(object_name: str) -> None:
     set_metadata(AYON_CONTAINERS, updated_containers)
 
 
-def get_current_workfile():
-    """Get the current file path from the host."""
+def get_current_workfile() -> str:
+    """Get the current file path from the host.
+    
+    Returns:
+        str: The current workfile path.
+    """
     host = registered_host()
     return host.get_current_workfile()
 
 
-def get_ayon_metadata():
-    """get AYON relevant metadata from current file
+def get_ayon_metadata() -> dict:
+    """Get AYON relevant metadata from current file.
 
     Returns:
-        str : json string for meta data [key - value] list
+        dict: AYON metadata as a dictionary.
     """
     # need to convert string to dict
     metadata_str = utility_api.GetMetaDataForCurrentGarment()
     return json.loads(metadata_str)
 
 
-def get_instances():
+def get_instances() -> dict:
     """Retrieve all stored instances from the project settings."""
     ayon_metadata = get_ayon_metadata()
     return ayon_metadata.get(AYON_INSTANCES, {})
 
 
-def get_instances_values():
-    """Retrieve all stored instances from the project settings."""
+def get_instances_values() -> list:
+    """Retrieve all stored instances from the project settings.
+    
+    Returns:
+        list: List of all instance values from the project settings.
+    """
     ayon_instances = get_instances()
     return list(ayon_instances.values())
 
 
-def ls():
-    """List all AYON containers in the current file metadata."""
+def ls() -> list:
+    """List all AYON containers in the current file metadata.
+
+    Returns:
+        list: List of AYON container metadata dictionaries.
+    """
     ayon_metadata = get_ayon_metadata() or {}
     return ayon_metadata.get(AYON_CONTAINERS, [])
 
 
-def set_metadata(data_type: str, data: Union[dict, list]):
+def set_metadata(data_type: str, data: Union[dict, list]) -> None:
     """Set instance data into the current file metadata."""
     ayon_metadata = get_ayon_metadata()
     ayon_metadata[data_type] = data
@@ -213,12 +264,13 @@ def set_metadata(data_type: str, data: Union[dict, list]):
     utility_api.SetMetaDataForCurrentGarment(json_to_str_data)
 
 
-def set_instance(instance_id, instance_data, update=False):
+def set_instance(
+    instance_id: str, instance_data: dict, *, update: bool = False) -> None:
     """Set a single instance into the current file metadata."""
     set_instances({instance_id: instance_data}, update=update)
 
 
-def set_instances(instance_data_by_id, update=False):
+def set_instances(instance_data_by_id: dict, *, update: bool = False) -> None:
     """Set multiple instances into the current file metadata.
 
     Args:
@@ -237,18 +289,20 @@ def set_instances(instance_data_by_id, update=False):
     set_metadata(AYON_INSTANCES, instances)
 
 
-def remove_instance(instance_id):
-    """Helper method to remove the data for a specific container"""
+def remove_instance(instance_id: str) -> None:
+    """Helper method to remove the data for a specific container."""
     instances = get_instances()
     instances.pop(instance_id, None)
     set_metadata(AYON_INSTANCES, instances)
 
 
-def save_workfile(filepath):
+def save_workfile(filepath: str) -> None:
+    """Save the current workfile to the specified file path."""
     export_api.ExportZPrj(filepath)
     open_workfile(filepath)
 
 
-def open_workfile(filepath):
+def open_workfile(filepath: str) -> None:
+    """Open a workfile from the specified file path."""
     import_options = ApiTypes.ImportZPRJOption()
     import_api.ImportZprj(filepath, import_options)

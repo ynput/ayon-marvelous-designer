@@ -1,4 +1,6 @@
-from ayon_marvelousdesigner.api import plugin
+"""Create plugin for Marvelous Designer model product type."""
+
+from ...api import plugin
 
 
 class CreateModel(plugin.MDCreator):

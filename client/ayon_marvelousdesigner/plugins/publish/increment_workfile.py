@@ -1,9 +1,14 @@
+"""Pyblish plugin for incrementing workfile version after successful publish.
+
+This module contains a plugin that automatically increments the current
+workfile version number after a successful publish operation in MD.
+"""
 import os
+from typing import ClassVar
 
 import pyblish.api
-
 from ayon_core.lib import version_up
-from ayon_core.pipeline import registered_host
+from ayon_core.pipeline import KnownPublishError, registered_host
 
 
 class IncrementWorkfileVersion(pyblish.api.ContextPlugin):
@@ -12,18 +17,26 @@ class IncrementWorkfileVersion(pyblish.api.ContextPlugin):
     order = pyblish.api.IntegratorOrder + 1
     label = "Increment Workfile Version"
     optional = True
-    hosts = ["marvelousdesigner"]
+    hosts: ClassVar[list[str]] = ["marvelousdesigner"]
 
-    def process(self, context):
+    def process(self, context: pyblish.api.Context) -> None:
+        """Process the context to increment the workfile version.
 
-        assert all(result["success"] for result in context.data["results"]), (
-            "Publishing not successful so version is not increased.")
+        Args:
+            context (pyblish.api.Context): The publishing context.
+
+        Raises:
+            KnownPublishError: If the publishing was not successful.
+        """
+        if not all(result["success"] for result in context.data["results"]):
+            msg = "Publishing not successful so version is not increased."
+            raise KnownPublishError(msg)
 
         host = registered_host()
         current_filepath = context.data["currentFile"]
         try:
-            from ayon_core.pipeline.workfile import save_next_version
             from ayon_core.host.interfaces import SaveWorkfileOptionalData
+            from ayon_core.pipeline.workfile import save_next_version
 
             current_filename = os.path.basename(current_filepath)
             save_next_version(
@@ -48,4 +61,4 @@ class IncrementWorkfileVersion(pyblish.api.ContextPlugin):
             new_filepath = version_up(current_filepath)
             host.save_workfile(new_filepath)
 
-        self.log.info(f"Incrementing current workfile to: {new_filepath}")
+        self.log.info("Incrementing current workfile to: %s", new_filepath)

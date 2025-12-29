@@ -1,6 +1,14 @@
+"""Pre-launch hook for Marvelous Designer workfile handling.
+
+This module provides a hook that creates a temporary Zprj file for MD
+when no last workfile exists or when not starting from the last workfile.
+"""
+
 import os
 import shutil
-from ayon_applications import PreLaunchHook, LaunchTypes
+from typing import ClassVar
+
+from ayon_applications import LaunchTypes, PreLaunchHook
 from ayon_core.pipeline import tempdir
 from ayon_marvelousdesigner import MARVELOUS_DESIGNER_HOST_DIR
 
@@ -13,11 +21,12 @@ class CreateTempZprjFile(PreLaunchHook):
 
     Hook `GlobalHostDataHook` must be executed before this hook.
     """
-    app_groups = {"marvelousdesigner"}
+    app_groups: ClassVar = {"marvelousdesigner"}
     order = 12
-    launch_types = {LaunchTypes.local}
+    launch_types: ClassVar = {LaunchTypes.local}
 
-    def execute(self):
+    def execute(self) -> None:
+        """Execute the pre-launch hook to create temp zprj file."""
         last_workfile = self.data.get("last_workfile_path")
         if self.data.get("start_last_workfile")  \
             and last_workfile  \

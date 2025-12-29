@@ -1,20 +1,25 @@
-# -*- coding: utf-8 -*-
 """Collect current work file."""
 import os
 from pathlib import Path
+from typing import ClassVar
+
 import pyblish.api
 
 
 class CollectWorkfile(pyblish.api.InstancePlugin):
-    """Inject the current working file into context"""
+    """Inject the current working file into context."""
 
     order = pyblish.api.CollectorOrder - 0.01
     label = "Collect Workfile"
-    hosts = ['marvelousdesigner']
-    families = ["workfile"]
+    hosts: ClassVar[list[str]] = ["marvelousdesigner"]
+    families: ClassVar[list[str]] = ["workfile"]
 
-    def process(self, instance):
-        """Inject the current working file."""
+    def process(self, instance: pyblish.api.Instance) -> None:
+        """Inject the current working file.
+
+        Args:
+            instance (pyblish.api.Instance): The instance to process.
+        """
         context = instance.context
         current_file = context.data.get("currentFile")
         filepath = Path(current_file)

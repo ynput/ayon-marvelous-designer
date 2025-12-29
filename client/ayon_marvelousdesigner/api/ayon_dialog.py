@@ -1,19 +1,25 @@
-from qtpy import QtWidgets, QtCore, QtGui
+"""Ayon Marvelous Designer tools dialog module."""
+from __future__ import annotations
 
-from ayon_core import (
-    resources,
-    style
-)
-from ayon_core.tools.utils.lib import qt_app_context
+from typing import Any
+
+from ayon_core import resources, style
 from ayon_core.tools.utils import host_tools
+from ayon_core.tools.utils.lib import qt_app_context
+from qtpy import QtCore, QtGui, QtWidgets
 
 
 class MDBtnToolsWidget(QtWidgets.QWidget):
     """Widget containing buttons which are clickable."""
     tool_required = QtCore.Signal(str)
 
-    def __init__(self, parent=None):
-        super(MDBtnToolsWidget, self).__init__(parent)
+    def __init__(self, parent=None):  # noqa: ANN001
+        """Ayon Marvelous Designer tools widget.
+
+        Args:
+            parent (QMainWindow, optional): Parent widget. Defaults to None.
+        """
+        super(MDBtnToolsWidget, self).__init__(parent)  # noqa: UP008
 
         load_btn = QtWidgets.QPushButton("Load...", self)
         manage_btn = QtWidgets.QPushButton("Manage...", self)
@@ -33,23 +39,24 @@ class MDBtnToolsWidget(QtWidgets.QWidget):
         publish_btn.clicked.connect(self._on_publish)
         workfile_btn.clicked.connect(self._on_workfile)
 
-    def _on_load(self):
+    def _on_load(self) -> None:
         self.tool_required.emit("loader")
 
-    def _on_publish(self):
+    def _on_publish(self) -> None:
         self.tool_required.emit("publisher")
 
-    def _on_manage(self):
+    def _on_manage(self) -> None:
         self.tool_required.emit("sceneinventory")
 
-    def _on_workfile(self):
+    def _on_workfile(self) -> None:
         self.tool_required.emit("workfiles")
 
 
 class MDToolsDialog(QtWidgets.QDialog):
     """Dialog with tool buttons that will stay opened until user close it."""
-    def __init__(self, *args, **kwargs):
-        super(MDToolsDialog, self).__init__(*args, **kwargs)
+    def __init__(self, *args: Any, **kwargs: Any):
+        """Ayon Marvelous Designer tools dialog."""
+        super(MDToolsDialog, self).__init__(*args, **kwargs)  # noqa: UP008
 
         self.setWindowTitle("Ayon tools")
         icon = QtGui.QIcon(resources.get_ayon_icon_filepath())
@@ -74,29 +81,46 @@ class MDToolsDialog(QtWidgets.QDialog):
 
         self._first_show = True
 
-    def sizeHint(self):
-        result = super(MDToolsDialog, self).sizeHint()
+    def sizeHint(self) -> QtCore.QSize:  # noqa: N802
+        """Override size hint to make dialog wider.
+
+        Returns:
+            QSize: Size hint object with modified width.
+        """
+        result = super().sizeHint()
         result.setWidth(result.width() * 2)
         return result
 
-    def showEvent(self, event):
-        super(MDToolsDialog, self).showEvent(event)
+    def showEvent(self, event: QtGui.QShowEvent) -> None:  # noqa: N802
+        """Handle show event for the dialog.
+        
+        Applies stylesheet on first show to ensure proper styling.
+        
+        Args:
+            event: The show event from Qt framework.
+        """
+        super().showEvent(event)
         if self._first_show:
             self.setStyleSheet(style.load_stylesheet())
             self._first_show = False
 
-    def _on_tool_require(self, tool_name):
+    def _on_tool_require(self, tool_name: str) -> None:
         host_tools.show_tool_by_name(tool_name, parent=self)
 
 
 class WindowCache:
     """Cached objects and methods to be used in global scope."""
-    dialog = None
+    dialog: MDToolsDialog | None = None
     _popup = None
     _first_show = True
 
     @classmethod
-    def show_dialog(cls):
+    def show_dialog(cls) -> None:
+        """Show the tools dialog window.
+        
+        Creates a new dialog instance if none exists, then shows, raises,
+        and activates the dialog window.
+        """
         with qt_app_context():
             if cls.dialog is None:
                 cls.dialog = MDToolsDialog()
@@ -106,7 +130,12 @@ class WindowCache:
             cls.dialog.activateWindow()
 
 
-def show_tools_dialog():
+def show_tools_dialog() -> None:
+    """Show the Marvelous Designer tools dialog.
+
+    Creates and shows the tools dialog if it doesn't exist or isn't visible.
+    The dialog provides access to Ayon tools like loader, publisher, scene
+    inventory, and workfiles management.
+    """
     if not WindowCache.dialog or not WindowCache.dialog.isVisible():
         WindowCache.show_dialog()
-    return WindowCache.dialog

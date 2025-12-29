@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 """Collect current work file."""
+from typing import ClassVar
 import pyblish.api
 from ayon_core.lib import BoolDef, UISeparatorDef, UILabelDef
 from ayon_core.pipeline.publish import AYONPyblishPluginMixin
@@ -7,15 +7,19 @@ from ayon_core.pipeline.publish import AYONPyblishPluginMixin
 
 class CollectExportOption(pyblish.api.InstancePlugin,
                           AYONPyblishPluginMixin):
-    """Inject the current export option into context"""
+    """Inject the current export option into context."""
 
     order = pyblish.api.CollectorOrder - 0.01
     label = "Collect Export Option"
-    hosts = ['marvelousdesigner']
-    families = ["model", "pointcache"]
+    hosts: ClassVar[list[str]] = ["marvelousdesigner"]
+    families: ClassVar[list[str]] = ["model", "pointcache"]
 
-    def process(self, instance):
-        """Inject the current export option."""
+    def process(self, instance: pyblish.api.Instance) -> None:
+        """Inject the current export option.
+
+        Args:
+            instance (pyblish.api.Instance): The instance to process.
+        """
         attr_values = self.get_attr_values_from_data(instance.data)
         export_option_data = {
             "bExportGarment": attr_values.get("bExportGarment", True),

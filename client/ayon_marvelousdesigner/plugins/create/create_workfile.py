@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Creator plugin for creating workfiles."""
 from ayon_core.pipeline import CreatedInstance, AutoCreator
 
@@ -21,6 +20,7 @@ class CreateWorkfile(AutoCreator):
     settings_category = "marvelousdesigner"
 
     def create(self):
+        """Create or update the workfile instance in the current context."""
         variant = self.default_variant
         project_name = self.project_name
         folder_path = self.create_context.get_current_folder_path()
@@ -86,13 +86,15 @@ class CreateWorkfile(AutoCreator):
             instance_data=current_instance.data_to_store()
         )
 
-    def collect_instances(self):
+    def collect_instances(self) -> None:
+        """Collect existing instances from MD and add them to the context."""
         for instance in get_instances_values():
             if (instance.get("creator_identifier") == self.identifier or
                     instance.get("productType") == self.product_type):
                 self.create_instance_in_context_from_existing(instance)
 
-    def update_instances(self, update_list):
+    def update_instances(self, update_list: list) -> None:  # noqa: PLR6301
+        """Update existing instances with new data."""
         instance_data_by_id = {}
         for instance, _changes in update_list:
             # Persist the data
@@ -101,7 +103,17 @@ class CreateWorkfile(AutoCreator):
             instance_data_by_id[instance_id] = instance_data
         set_instances(instance_data_by_id, update=True)
 
-    def create_instance_in_context(self, product_name, data):
+    def create_instance_in_context(
+            self, product_name: str, data: dict) -> CreatedInstance:
+        """Create a new instance in the current context.
+        
+        Args:
+            product_name (str): The name of the product to create.
+            data (dict): The data for the instance.
+
+        Returns:
+            CreatedInstance: The newly created instance.
+        """
         instance = CreatedInstance(
             product_type=self.product_type,
             product_name=product_name,
@@ -111,7 +123,16 @@ class CreateWorkfile(AutoCreator):
         self.create_context.creator_adds_instance(instance)
         return instance
 
-    def create_instance_in_context_from_existing(self, data):
+    def create_instance_in_context_from_existing(
+            self, data: dict) -> CreatedInstance:
+        """Create an instance in the current context from existing data.
+
+        Args:
+            data (dict): The existing instance data.
+
+        Returns:
+            CreatedInstance: The created instance from existing data.
+        """
         instance = CreatedInstance.from_existing(data, self)
         self.create_context.creator_adds_instance(instance)
         return instance
