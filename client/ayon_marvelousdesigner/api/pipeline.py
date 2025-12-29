@@ -41,6 +41,17 @@ AYON_CONTEXT_DATA = "ayon_context_data"
 
 
 class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
+    """Host class for Marvelous Designer integration with AYON pipeline.
+
+    This class provides the main interface between AYON and Marvelous Designer,
+    implementing workfile operations, loading, and publishing functionality.
+
+    Attributes:
+        name (str): The host name identifier.
+        _has_been_setup (bool): Flag indicating if the host has been initialized.
+        callbacks (list): List of registered callbacks.
+        shelves (list): List of UI shelves.
+    """
     name = "marvelousdesigner"
 
     def __init__(self):
@@ -86,8 +97,8 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
         """Save the current workfile to the specified destination path.
 
         Args:
-            dst_path (str | None, optional): Destination path to save the workfile.
-            Defaults to None.
+            dst_path (str | None, optional): Destination path to save
+                the workfile. Defaults to None.
 
         Returns:
             str | None: The path where the workfile was saved, or None
@@ -118,6 +129,8 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
 
     def update_context_data(self, data: dict, changes: dict) -> None:  # noqa : PLR6301
         """Update the context data in the current file metadata."""
+        # Note: 'changes' parameter is part of the interface but not used in MD
+        _ = changes  # Explicitly ignore the unused parameter
         set_metadata(AYON_CONTEXT_DATA, data)
 
     def get_context_data(self) -> dict:  # noqa: PLR6301
@@ -196,7 +209,8 @@ def remove_container_data(object_name: str) -> None:
     """Remove container data for a specific object in the scene.
 
     Args:
-        object_name (str): Name of the object whose container data is to be removed.
+        object_name (str): Name of the object whose container data is to
+            be removed.
     """
     container_data = ls()
     # Filter out the container for the specified object
@@ -210,7 +224,7 @@ def remove_container_data(object_name: str) -> None:
 
 def get_current_workfile() -> str:
     """Get the current file path from the host.
-    
+
     Returns:
         str: The current workfile path.
     """
@@ -230,7 +244,11 @@ def get_ayon_metadata() -> dict:
 
 
 def get_instances() -> dict:
-    """Retrieve all stored instances from the project settings."""
+    """Retrieve all stored instances from the project settings.
+
+    Returns:
+        dict: Dictionary of stored instances from the project settings.
+    """
     ayon_metadata = get_ayon_metadata()
     return ayon_metadata.get(AYON_INSTANCES, {})
 

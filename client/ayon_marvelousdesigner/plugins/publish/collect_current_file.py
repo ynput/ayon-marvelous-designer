@@ -19,7 +19,7 @@ class CollectCurrentFile(pyblish.api.ContextPlugin):
 
     def process(self, context: pyblish.api.Context) -> None:
         """Process the context to inject current workfile path.
-        
+
         Args:
             context (pyblish.api.Context): The publish context to modify.
         """

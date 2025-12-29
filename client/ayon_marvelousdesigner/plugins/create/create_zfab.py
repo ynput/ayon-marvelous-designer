@@ -5,11 +5,11 @@ This module provides the CreateZFab creator class for generating
 zfab product instances in Marvelous Designer.
 """
 
+# Marvelous Designer Module API
+import fabric_api
+from ayon_core.lib import BoolDef
 from ayon_marvelousdesigner.api import plugin
 from ayon_marvelousdesigner.api.pipeline import set_instance
-
-from ayon_core.lib import BoolDef
-import fabric_api
 
 
 class CreateZFab(plugin.MDCreator):
@@ -43,7 +43,7 @@ class CreateZFab(plugin.MDCreator):
     @staticmethod
     def get_pre_create_attr_defs() -> list:
         """Get pre-creation attribute definitions.
-        
+
         Returns:
             list: List of attribute definitions for pre-creation configuration.
         """

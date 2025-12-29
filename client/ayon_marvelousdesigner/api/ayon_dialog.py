@@ -31,7 +31,7 @@ class MDBtnToolsWidget(QtWidgets.QWidget):
         layout.addWidget(load_btn, 0)
         layout.addWidget(manage_btn, 0)
         layout.addWidget(publish_btn, 0)
-        layout.addWidget(workfile_btn , 0)
+        layout.addWidget(workfile_btn, 0)
         layout.addStretch(1)
 
         load_btn.clicked.connect(self._on_load)
@@ -93,9 +93,9 @@ class MDToolsDialog(QtWidgets.QDialog):
 
     def showEvent(self, event: QtGui.QShowEvent) -> None:  # noqa: N802
         """Handle show event for the dialog.
-        
+
         Applies stylesheet on first show to ensure proper styling.
-        
+
         Args:
             event: The show event from Qt framework.
         """
@@ -117,7 +117,7 @@ class WindowCache:
     @classmethod
     def show_dialog(cls) -> None:
         """Show the tools dialog window.
-        
+
         Creates a new dialog instance if none exists, then shows, raises,
         and activates the dialog window.
         """
