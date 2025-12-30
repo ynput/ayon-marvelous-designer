@@ -83,7 +83,7 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
             bool: True if there are unsaved changes, False otherwise.
         """
         # API not supported for the check
-        return False
+        return utility_api.CheckZPRJForUnsavedChanges()
 
     def get_workfile_extensions(self) -> list[str]:  # noqa: PLR6301
         """Get the list of supported workfile extensions.
