@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import utility_api
 from ayon_core import resources, style
 from ayon_core.tools.utils import host_tools
 from ayon_core.tools.utils.lib import qt_app_context
@@ -103,6 +104,17 @@ class MDToolsDialog(QtWidgets.QDialog):
         if self._first_show:
             self.setStyleSheet(style.load_stylesheet())
             self._first_show = False
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:  # noqa: N802
+        """Handle close event for the dialog.
+
+        Cleans up the dialog reference in WindowCache upon closing.
+
+        Args:
+            event: The close event from Qt framework.
+        """
+        super().closeEvent(event)
+        utility_api.ResetWidgetRegistry()
 
     def _on_tool_require(self, tool_name: str) -> None:
         host_tools.show_tool_by_name(tool_name, parent=self)
