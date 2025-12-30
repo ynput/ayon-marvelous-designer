@@ -31,6 +31,8 @@ class CreateZFab(plugin.MDCreator):
         """
         if pre_create_data.get("use_selection"):
             instance_data["fabricIndex"] = fabric_api.GetCurrentFabricIndex()
+        else:
+            instance_data["fabricIndex"] = 1
 
         instance = self.create_instance_in_context(product_name,
                                                    instance_data)
