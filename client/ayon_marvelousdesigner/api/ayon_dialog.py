@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import utility_api
 from ayon_core import resources, style
 from ayon_core.tools.utils import host_tools
 from ayon_core.tools.utils.lib import qt_app_context
@@ -31,7 +32,7 @@ class MDBtnToolsWidget(QtWidgets.QWidget):
         layout.addWidget(load_btn, 0)
         layout.addWidget(manage_btn, 0)
         layout.addWidget(publish_btn, 0)
-        layout.addWidget(workfile_btn , 0)
+        layout.addWidget(workfile_btn, 0)
         layout.addStretch(1)
 
         load_btn.clicked.connect(self._on_load)
@@ -93,9 +94,9 @@ class MDToolsDialog(QtWidgets.QDialog):
 
     def showEvent(self, event: QtGui.QShowEvent) -> None:  # noqa: N802
         """Handle show event for the dialog.
-        
+
         Applies stylesheet on first show to ensure proper styling.
-        
+
         Args:
             event: The show event from Qt framework.
         """
@@ -103,6 +104,17 @@ class MDToolsDialog(QtWidgets.QDialog):
         if self._first_show:
             self.setStyleSheet(style.load_stylesheet())
             self._first_show = False
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:  # noqa: N802
+        """Handle close event for the dialog.
+
+        Cleans up the dialog reference in WindowCache upon closing.
+
+        Args:
+            event: The close event from Qt framework.
+        """
+        super().closeEvent(event)
+        utility_api.ResetWidgetRegistry()
 
     def _on_tool_require(self, tool_name: str) -> None:
         host_tools.show_tool_by_name(tool_name, parent=self)
@@ -117,7 +129,7 @@ class WindowCache:
     @classmethod
     def show_dialog(cls) -> None:
         """Show the tools dialog window.
-        
+
         Creates a new dialog instance if none exists, then shows, raises,
         and activates the dialog window.
         """
