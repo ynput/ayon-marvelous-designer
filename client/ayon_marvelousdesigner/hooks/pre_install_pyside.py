@@ -72,12 +72,13 @@ class InstallQtBinding(PreLaunchHook):
             "install",
             "PySide6",
             "--target",
-            qt_binding_dir.as_posix()
+            qt_binding_dir.as_posix(),
+            "--ignore-installed",
         ]
 
         return self.pip_install(args)
 
-    def pip_install(self, args: list) -> Union[bool, None]:
+    def pip_install(self, args: list) -> Union[int, None]:
         """Execute pip install command in subprocess.
 
         Args:
@@ -95,7 +96,8 @@ class InstallQtBinding(PreLaunchHook):
             #   site-packages and make sure it is binary compatible
 
             process = subprocess.Popen(
-                args, stdout=subprocess.PIPE, universal_newlines=True
+                args, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, universal_newlines=True
             )
             process.communicate()
 
@@ -110,3 +112,5 @@ class InstallQtBinding(PreLaunchHook):
             pass
         else:
             return process.returncode == 0
+
+        return None
