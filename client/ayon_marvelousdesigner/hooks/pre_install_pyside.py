@@ -70,7 +70,6 @@ class InstallQtBinding(PreLaunchHook):
             "-m",
             "pip",
             "install",
-            "--ignore-installed",
             "PySide6",
             "--target",
             qt_binding_dir.as_posix()
