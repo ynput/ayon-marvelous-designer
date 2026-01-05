@@ -19,7 +19,7 @@ class CreateWorkfile(AutoCreator):
     default_variant = "Main"
     settings_category = "marvelousdesigner"
 
-    def create(self):
+    def create(self) -> None:
         """Create or update the workfile instance in the current context."""
         variant = self.default_variant
         project_name = self.project_name

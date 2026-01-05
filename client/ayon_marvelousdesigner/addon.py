@@ -14,7 +14,7 @@ MARVELOUS_DESIGNER_HOST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class MarvelousDesignerAddon(AYONAddon, IHostAddon):
     """Addon class for Marvelous Designer integration with AYON.
-    
+
     This addon provides host integration capabilities for Marvelous Designer,
     including launch hooks, environment setup, and workfile extensions.
     """
