@@ -5,7 +5,8 @@ in various formats (Alembic, OBJ, FBX) from Marvelous Designer.
 """
 
 import os
-from typing import ClassVar, List
+from pathlib import Path
+from typing import ClassVar
 
 import ApiTypes
 import export_api
@@ -41,11 +42,12 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         stagingdir = self.staging_dir(instance)
         filename = f"{instance.name}.{self.extension}"
         xml_filename = f"{instance.name}.xml"
-        filepath = os.path.join(stagingdir, filename)
-        xml_output = os.path.join(stagingdir, xml_filename)
+        filepath = Path(stagingdir) / filename
+
+        xml_output = Path(stagingdir) / xml_filename
         export_option = self.export_option(instance)
 
-        output_files = self._export_mesh(filepath, export_option)
+        output_files = self._export_mesh(filepath.as_posix(), export_option)
         if not output_files:
             msg = (
                 f"Files [{output_files}] wasn't produced by Marvelous "
