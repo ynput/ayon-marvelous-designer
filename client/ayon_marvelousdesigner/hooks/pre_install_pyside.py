@@ -7,6 +7,7 @@ This module provides:
 from __future__ import annotations
 
 import platform
+import shutil
 import subprocess
 from pathlib import Path
 from typing import ClassVar, Union
@@ -29,6 +30,7 @@ class InstallQtBinding(PreLaunchHook):
             if current_platform != "windows"
             else "python.exe"
         )
+        python_executable = shutil.which(python_executable)
         md_setting = self.data["project_settings"]["marvelous_designer"]
         qt_binding_dir = md_setting["prelaunch_settings"].get(
             "qt_binding_dir", "")
