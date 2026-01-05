@@ -30,7 +30,7 @@ class InstallQtBinding(PreLaunchHook):
             if current_platform != "windows"
             else "python.exe"
         )
-        python_executable = shutil.which(python_exe)
+        python_executable = Path(shutil.which(python_exe)).as_posix()
         md_setting = self.data["project_settings"]["marvelous_designer"]
         qt_binding_dir = md_setting["prelaunch_settings"].get(
             "qt_binding_dir", "")
