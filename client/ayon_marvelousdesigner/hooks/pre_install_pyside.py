@@ -25,12 +25,12 @@ class InstallQtBinding(PreLaunchHook):
     def execute(self) -> None:
         """Execute the pre-launch hook to install PySide6."""
         current_platform = platform.system().lower()
-        python_executable = (
+        python_exe = (
             "python"
             if current_platform != "windows"
             else "python.exe"
         )
-        python_executable = shutil.which(python_executable)
+        python_executable = shutil.which(python_exe)
         md_setting = self.data["project_settings"]["marvelous_designer"]
         qt_binding_dir = md_setting["prelaunch_settings"].get(
             "qt_binding_dir", "")
