@@ -33,7 +33,7 @@ class CreateZFab(plugin.MDCreator):
             fabric_index = fabric_api.GetCurrentFabricIndex()
             instance_data["fabricIndex"] = fabric_index
         else:
-            fabric_index = fabric_api.GetFirstFabricIndex()
+            fabric_index = 1
             instance_data["fabricIndex"] = fabric_index
 
         instance_data["fabricName"] = fabric_api.GetFabricName(fabric_index)
