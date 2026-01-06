@@ -27,7 +27,7 @@ class ColorFormatter(logging.Formatter):
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
     fmt = (
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s "  # noqa
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s "
         "(%(filename)s:%(lineno)d)"
     )
 
@@ -76,7 +76,7 @@ def create_init_file(dirpath: str, msg: str) -> None:
     ini_file = f"{dirpath}/__init__.py"
     Path(ini_file).touch()
     NFILES.append(ini_file)
-    logging.info(f"{msg}: created '{ini_file}'")    # noqa: G004
+    logging.info(f"{msg}: created '{ini_file}'")  # noqa: G004, LOG015
 
 
 def create_parent_init_files(dirpath: str, rootpath: str, msg: str) -> None:
@@ -153,7 +153,7 @@ def remove_missing_init_files(msg: str = "") -> None:
 
     for file in nfiles:
         Path(file).unlink()
-        logging.info(f"{msg}: removed {file}")     # noqa: G004
+        logging.info(f"{msg}: removed {file}")  # noqa: G004, LOG015
 
     os.remove(TMP_FILE)
     NFILES = []
@@ -161,7 +161,7 @@ def remove_missing_init_files(msg: str = "") -> None:
 
 def remove_pychache_dirs(msg: str = "") -> None:
     """Remove all existing '__pycache__' directories.
-    
+
     This function walks the current directory and removes all existing
     '__pycache__' directories.
 
@@ -176,10 +176,10 @@ def remove_pychache_dirs(msg: str = "") -> None:
             pydir = Path(f"{dirpath}/__pycache__")
             rmtree(pydir)
             nremoved += 1
-            logging.info(f"{msg}: removed '{pydir}'")     # noqa: G004
+            logging.info(f"{msg}: removed '{pydir}'")  # noqa: G004, LOG015
 
     if not nremoved:
-        logging.info(f"{msg}: no __pycache__ dirs found")     # noqa: G004
+        logging.info(f"{msg}: no __pycache__ dirs found")  # noqa: G004, LOG015
 
 
 # mkdocs hooks ----------------------------------------------------------------
@@ -221,7 +221,7 @@ def on_pre_build(config: dict) -> None:  # noqa: ARG001
 
 def on_post_build(config: dict) -> None:  # noqa: ARG001
     """This function is called after the MkDocs build process ends.
-    
+
     It removes temporary `__init__.py` files that were added in the
     `on_pre_build()` function.
     """
