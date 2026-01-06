@@ -1,3 +1,10 @@
+"""MkDocs hooks for managing __init__.py files and __pycache__ directories.
+
+This module provides utility functions and MkDocs hooks to:
+- Create temporary __init__.py files for documentation generation
+- Remove temporary __init__.py files after documentation build
+- Clean up __pycache__ directories
+"""
 import glob
 import json
 import logging
