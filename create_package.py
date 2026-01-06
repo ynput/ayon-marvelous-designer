@@ -1,4 +1,4 @@
-#!/usr/bin/env python       # noqa: ignore
+#!/usr/bin/env python
 
 """Prepares server package from addon repo to upload to server.
 
@@ -124,7 +124,7 @@ def _get_yarn_executable() -> Union[str, None]:
     return None
 
 
-def safe_copy_file(src_path: str, dst_path: str):
+def safe_copy_file(src_path: str, dst_path: str) -> None:
     """Copy file and make sure destination directory exists.
 
     Ignore if destination already contains directories from source.
@@ -229,8 +229,16 @@ def build_frontend() -> None:
         msg = "Yarn executable was not found."
         raise RuntimeError(msg)
 
-    subprocess.run([yarn_executable, "install"], check=False, cwd=FRONTEND_ROOT)
-    subprocess.run([yarn_executable, "build"], check=False, cwd=FRONTEND_ROOT)
+    subprocess.run(
+        [yarn_executable, "install"],
+        check=False,
+        cwd=FRONTEND_ROOT
+    )
+    subprocess.run(
+        [yarn_executable, "build"],
+        check=False,
+        cwd=FRONTEND_ROOT
+    )
     if not os.path.exists(FRONTEND_DIST_ROOT):
         msg = "Frontend build failed. Did not find 'dist' folder."
         raise RuntimeError(msg)
@@ -388,6 +396,14 @@ def create_addon_package(
     files_mapping: List[FileMapping],
     log: logging.Logger
 ) -> None:
+    """Create a zip file containing the addon package.
+
+    Args:
+        output_dir (str): Directory path where the zip file will be created.
+        files_mapping (List[FileMapping]): List of tuples with source file
+            (path or BytesIO) and destination subpath.
+        log (logging.Logger): Logger object for logging messages.
+    """
     log.info(f"Creating package for {ADDON_NAME}-{ADDON_VERSION}")  # noqa: G004
 
     os.makedirs(output_dir, exist_ok=True)
@@ -414,8 +430,8 @@ def main(
     """Create addon package with server and client code.
 
     Args:
-        output_dir (Optional[str]): Directory path where package will be created.
-            Defaults to 'package' subdirectory in current root.
+        output_dir (Optional[str]): Directory path where package will be
+            created. Defaults to 'package' subdirectory in current root.
         skip_zip (Optional[bool]): If True, creates folder structure instead of
             zip file. Defaults to False.
         only_client (Optional[bool]): If True, extracts only client code.
