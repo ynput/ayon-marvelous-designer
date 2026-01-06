@@ -48,7 +48,8 @@ class MarvelousDesignerHost(HostBase, IWorkfileHost, ILoadHost, IPublishHost):
 
     Attributes:
         name (str): The host name identifier.
-        _has_been_setup (bool): Flag indicating if the host has been initialized.
+        _has_been_setup (bool): Flag indicating if the host has been
+        initialized.
         callbacks (list): List of registered callbacks.
         shelves (list): List of UI shelves.
     """
@@ -255,7 +256,7 @@ def get_instances() -> dict:
 
 def get_instances_values() -> list:
     """Retrieve all stored instances from the project settings.
-    
+
     Returns:
         list: List of all instance values from the project settings.
     """

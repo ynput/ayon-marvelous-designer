@@ -1,4 +1,3 @@
-
 """Creator plugin for Marvelous Designer Zfab products.
 
 This module provides the CreateZFab creator class for generating

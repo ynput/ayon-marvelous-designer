@@ -55,7 +55,7 @@ class MDBtnToolsWidget(QtWidgets.QWidget):
 
 class MDToolsDialog(QtWidgets.QDialog):
     """Dialog with tool buttons that will stay opened until user close it."""
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __init__(self, *args, **kwargs):  # noqa: ANN002, ANN003
         """Ayon Marvelous Designer tools dialog."""
         super(MDToolsDialog, self).__init__(*args, **kwargs)  # noqa: UP008
 

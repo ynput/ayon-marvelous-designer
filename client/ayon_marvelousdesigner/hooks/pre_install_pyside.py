@@ -7,6 +7,7 @@ This module provides:
 from __future__ import annotations
 
 import platform
+import shutil
 import subprocess
 from pathlib import Path
 from typing import ClassVar, Union
@@ -24,11 +25,12 @@ class InstallQtBinding(PreLaunchHook):
     def execute(self) -> None:
         """Execute the pre-launch hook to install PySide6."""
         current_platform = platform.system().lower()
-        python_executable = (
+        python_exe = (
             "python"
             if current_platform != "windows"
             else "python.exe"
         )
+        python_executable = Path(shutil.which(python_exe)).as_posix()
         md_setting = self.data["project_settings"]["marvelous_designer"]
         qt_binding_dir = md_setting["prelaunch_settings"].get(
             "qt_binding_dir", "")

@@ -15,6 +15,7 @@ from ayon_marvelousdesigner.api.pipeline import (
     containerise,
     imprint,
     remove_container_data,
+    remove_container_data,
 )
 
 

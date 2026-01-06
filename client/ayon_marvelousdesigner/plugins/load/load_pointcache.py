@@ -1,4 +1,3 @@
-
 """Point cache loader plugin for Marvelous Designer integration.
 
 This module provides LoadPointCache class for loading various point cache formats
@@ -72,6 +71,8 @@ class LoadPointCache(load.LoaderPlugin):
         elif extension == ".obj":
             import_api.ImportOBJ(file_path, options)
         else:
+            msg = f"Unsupported pointcache format: {extension}"
+            raise LoadError(msg)
             msg = f"Unsupported pointcache format: {extension}"
             raise LoadError(msg)
 

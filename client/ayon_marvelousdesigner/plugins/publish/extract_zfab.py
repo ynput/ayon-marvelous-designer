@@ -32,6 +32,7 @@ class ExtractZFab(publish.Extractor):
 
     def process(self, instance: pyblish.api.Instance) -> None:
         """Process the instance to extract zfab data."""
+        """Process the instance to extract zfab data."""
         stagingdir = self.staging_dir(instance)
         filename = f"{instance.name}.zfab"
         filepath = os.path.join(stagingdir, filename)
