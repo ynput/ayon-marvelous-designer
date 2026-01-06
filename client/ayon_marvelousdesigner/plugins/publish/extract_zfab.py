@@ -32,15 +32,15 @@ class ExtractZFab(publish.Extractor):
 
     def process(self, instance: pyblish.api.Instance) -> None:
         """Process the instance to extract zfab data."""
-        """Process the instance to extract zfab data."""
         stagingdir = self.staging_dir(instance)
-        filename = f"{instance.name}.zfab"
+        extension = "zfab"
+        filename = f"{instance.name}.{extension}"
         filepath = os.path.join(stagingdir, filename)
         target_fabric_index = instance.data["fabricIndex"]
 
         fabric_api.ExportZFab(filepath, target_fabric_index)
 
-        rep = Representation("zfab file", traits=[
+        rep = Representation(extension, traits=[
             FileLocation(
                 file_path=Path(stagingdir) / filename),
             Static(),

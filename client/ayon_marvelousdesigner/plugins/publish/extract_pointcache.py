@@ -71,7 +71,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             )
         up_axis = self.get_up_axis(export_option)
         rep = Representation(
-            "pointcache",
+            self.extension,
             traits=[
                 Static(),
                 FileLocation(file_path=Path(stagingdir) / filename),
