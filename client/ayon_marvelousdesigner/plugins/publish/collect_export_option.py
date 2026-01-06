@@ -1,7 +1,8 @@
 """Collect current work file."""
 from typing import ClassVar
+
 import pyblish.api
-from ayon_core.lib import BoolDef, UISeparatorDef, UILabelDef
+from ayon_core.lib import BoolDef, UILabelDef, UISeparatorDef
 from ayon_core.pipeline.publish import AYONPyblishPluginMixin
 
 
@@ -33,7 +34,7 @@ class CollectExportOption(pyblish.api.InstancePlugin,
     @classmethod
     def get_attribute_defs(cls) -> list[BoolDef]:
         """Get attribute definitions for export options.
-        
+
         Returns:
         list: List of boolean attribute definitions for export options.
 

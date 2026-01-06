@@ -69,7 +69,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
 
         instance.data["representations"].append(representation)
         self.log.info(
-            "Extracted instance '%s' to: %s" % (instance.name, filepath)
+            f"Extracted instance '{instance.name}' to: {filepath}"  # noqa: G004
         )
 
         if os.path.exists(xml_output):
@@ -81,7 +81,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             }
             instance.data["representations"].append(xml_representation)
             self.log.info(
-                "Extracted instance '%s' to: %s" % (instance.name, filepath)
+                f"Extracted instance '{instance.name}' to: {filepath}"  # noqa: G004
             )
 
     def _export_mesh(
@@ -108,12 +108,12 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         if self.extension == "obj":
             return export_api.ExportOBJW(filepath, export_options)
 
-        raise KnownPublishError(
-            f"Unsupported export format: {self.extension}"
-        )
+        msg = f"Unsupported export format: {self.extension}"
+        raise KnownPublishError(msg)
 
+    @staticmethod
     def export_option(
-            self, instance: pyblish.api.Instance
+            instance: pyblish.api.Instance
         ) -> ApiTypes.ImportExportOption:
         """Get export options for point cache export.
 

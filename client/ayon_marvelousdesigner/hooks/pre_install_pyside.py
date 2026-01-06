@@ -87,7 +87,7 @@ class InstallQtBinding(PreLaunchHook):
             args (list): List of command line arguments for pip install.
 
         Returns:
-            bool or None: True if pip install was successful (return code 0), 
+            bool or None: True if pip install was successful (return code 0),
             None if an exception occurred during execution.
 
         """

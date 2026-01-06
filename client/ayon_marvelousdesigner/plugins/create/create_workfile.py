@@ -1,10 +1,9 @@
 """Creator plugin for creating workfiles."""
-from ayon_core.pipeline import CreatedInstance, AutoCreator
-
+from ayon_core.pipeline import AutoCreator, CreatedInstance
 from ayon_marvelousdesigner.api.pipeline import (
-    set_instances,
+    get_instances_values,
     set_instance,
-    get_instances_values
+    set_instances,
 )
 
 
@@ -106,7 +105,7 @@ class CreateWorkfile(AutoCreator):
     def create_instance_in_context(
             self, product_name: str, data: dict) -> CreatedInstance:
         """Create a new instance in the current context.
-        
+
         Args:
             product_name (str): The name of the product to create.
             data (dict): The data for the instance.

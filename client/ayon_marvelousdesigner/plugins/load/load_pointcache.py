@@ -1,4 +1,3 @@
-
 """Point cache loader plugin for Marvelous Designer integration.
 
 This module provides LoadPointCache class for loading various point cache formats
@@ -6,27 +5,40 @@ This module provides LoadPointCache class for loading various point cache format
 """
 
 import os
-from typing import Union
-import import_api
+from typing import ClassVar, Optional, Union
+
 import ApiTypes
+import import_api
 from ayon_core.pipeline import load
 from ayon_core.pipeline.load import LoadError
 from ayon_marvelousdesigner.api.pipeline import containerise
 
 
 class LoadPointCache(load.LoaderPlugin):
-    """Load Pointcache for project"""
+    """Load Pointcache for project."""
 
-    product_types = {"*"}
-    representations = {"abc", "fbx", "obj"}
+    product_types: ClassVar[set[str]] = {"*"}
+    representations: ClassVar[set[str]] = {"abc", "fbx", "obj"}
 
     label = "Load Pointcache"
     order = -10
     icon = "code-fork"
     color = "orange"
 
-    def load(self, context, name, namespace, options):
-        """Load pointcache into the scene."""
+    def load(self,
+             context: dict,
+             name: Optional[str] = None,
+             namespace: Optional[str] = None,
+             options: Optional[dict] = None) -> None:
+        """Load pointcache into the scene.
+
+        Args:
+            context (dict): Context dictionary with representation info.
+            name (str): Name of the container.
+            namespace (str): Namespace for the loaded data.
+            options (dict): Additional options for loading.
+
+        """
         filepath = self.filepath_from_context(context)
         extension = os.path.splitext(filepath)[-1].lower()
         loaded_options = self.load_options(extension)
@@ -52,7 +64,7 @@ class LoadPointCache(load.LoaderPlugin):
             options (ApiTypes.ImportExportOption): Options for loading.
 
         Raises:
-            LoaderError: If the pointcache format is unsupported.
+            LoadError: If the pointcache format is unsupported.
         """
         if extension == ".abc":
             import_api.ImportAlembic(filepath, options)
@@ -61,17 +73,19 @@ class LoadPointCache(load.LoaderPlugin):
         elif extension == ".obj":
             import_api.ImportOBJ(filepath, options)
         else:
-            raise LoadError(
-                f"Unsupported pointcache format: {extension}"
-            )
+            msg = f"Unsupported pointcache format: {extension}"
+            raise LoadError(msg)
 
     @staticmethod
     def load_options(extension: str) -> Union[
             ApiTypes.ImportAlembicOption, ApiTypes.ImportExportOption]:
         """Return options for loading pointcache.
-        
+
+        Args:
+            extension (str): Extension of pointcache file.
+
         Raises:
-            LoaderError: If the pointcache format is unsupported.
+            LoadError: If the pointcache format is unsupported.
         """
         if extension == ".abc":
             return ApiTypes.ImportAlembicOption()
@@ -79,6 +93,5 @@ class LoadPointCache(load.LoaderPlugin):
         if extension in {".fbx", ".obj"}:
             return ApiTypes.ImportExportOption()
 
-        raise LoadError(
-            f"Unsupported pointcache format: {extension}"
-        )
+        msg = f"Unsupported pointcache format: {extension}"
+        raise LoadError(msg)

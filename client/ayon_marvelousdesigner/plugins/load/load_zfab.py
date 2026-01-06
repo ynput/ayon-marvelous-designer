@@ -1,27 +1,42 @@
-
+"""Plugin to load ZFab files into Marvelous Designer."""
 import os
+from typing import ClassVar, Optional, Union
+
 import fabric_api
 from ayon_core.pipeline import load
 from ayon_marvelousdesigner.api.pipeline import (
     containerise,
     imprint,
-    remove_container_data
+    remove_container_data,
 )
 
 
 class LoadZfab(load.LoaderPlugin):
-    """Load ZFab for project"""
+    """Load ZFab for project."""
 
-    product_types = {"zfab"}
-    representations = {"zfab"}
+    product_types: ClassVar[set[str]] = {"zfab"}
+    representations: ClassVar[set[str]] = {"zfab"}
 
     label = "Load ZFab"
     order = -10
     icon = "code-fork"
     color = "orange"
 
-    def load(self, context, name, namespace, options):
-        """Load pointcache into the scene."""
+    def load(
+            self,
+            context: dict,
+            name: Optional[str] = None,
+            namespace: Optional[str] = None,
+            options: Optional[dict] = None) -> None:
+        """Load pointcache into the scene.
+
+        Args:
+            context (dict): Context dictionary with representation info.
+            name (str): Name of the container.
+            namespace (str): Namespace for the loaded data.
+            options (dict): Additional options for loading.
+
+        """
         filepath = self.filepath_from_context(context)
         fabric_index = fabric_api.AddFabric(filepath)
         containerise(
@@ -32,7 +47,7 @@ class LoadZfab(load.LoaderPlugin):
             options={"fabricIndex": fabric_index}
         )
 
-    def update(self, container, context):
+    def update(self, container: dict, context: dict) -> None:
         """Update loaded zfab in the scene."""
         repre_entity = context["representation"]
         filepath = self.filepath_from_context(context)
@@ -45,7 +60,7 @@ class LoadZfab(load.LoaderPlugin):
         })
 
 
-    def remove(self, container):
+    def remove(self, container: dict) -> None:
         """Remove loaded zfab from the scene."""
         fabric_index = container.get("fabricIndex")
         if fabric_index is not None:

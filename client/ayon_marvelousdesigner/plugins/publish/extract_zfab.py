@@ -1,3 +1,4 @@
+"""Extract zfab Format Plugin for Marvelous Designer in Ayon."""
 import os
 from typing import ClassVar
 
@@ -15,6 +16,7 @@ class ExtractZFab(publish.Extractor):
     families: ClassVar = ["zfab"]
 
     def process(self, instance: pyblish.api.Instance) -> None:
+        """Process the instance to extract zfab data."""
         stagingdir = self.staging_dir(instance)
         filename = f"{instance.name}.zfab"
         filepath = os.path.join(stagingdir, filename)
@@ -33,5 +35,5 @@ class ExtractZFab(publish.Extractor):
 
         instance.data["representations"].append(representation)
         self.log.info(
-            "Extracted instance '%s' to: %s" % (instance.name, filepath)
+            f"Extracted instance '{instance.name}' to: {filepath}"  # noqa: G004
         )
