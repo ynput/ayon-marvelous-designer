@@ -1,7 +1,7 @@
 """Point cache loader plugin for Marvelous Designer integration.
 
-This module provides LoadPointCache class for loading various point cache formats
-(ABC, FBX, OBJ) into Marvelous Designer through the AYON pipeline.
+This module provides LoadPointCache class for loading various point cache
+formats (ABC, FBX, OBJ) into Marvelous Designer through the AYON pipeline.
 """
 
 import os

@@ -1,6 +1,6 @@
 """Plugin to load ZFab files into Marvelous Designer."""
 import os
-from typing import ClassVar, Optional, Union
+from typing import ClassVar, Optional
 
 import fabric_api
 from ayon_core.pipeline import load
@@ -59,8 +59,7 @@ class LoadZfab(load.LoaderPlugin):
             "representation": repre_entity["id"],
         })
 
-
-    def remove(self, container: dict) -> None:
+    def remove(self, container: dict) -> None:  # noqa: PLR6301
         """Remove loaded zfab from the scene."""
         fabric_index = container.get("fabricIndex")
         if fabric_index is not None:
