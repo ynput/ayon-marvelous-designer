@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python       # noqa: ignore
 
 """Prepares server package from addon repo to upload to server.
 
@@ -27,13 +27,13 @@ import collections
 import io
 import logging
 import os
+from pathlib import Path
 import platform
 import re
 import shutil
 import subprocess
 import sys
 import zipfile
-from pathlib import Path
 from typing import Iterable, List, Optional, Pattern, Tuple, Union
 
 import package
@@ -91,12 +91,12 @@ class ZipFileLongPaths(zipfile.ZipFile):
     """
     _is_windows = platform.system().lower() == "windows"
 
-    def _extract_member(self, member, tpath, pwd):  # noqa: ANN001, ANN202
-        """Extracts a member from the archive to a physical file on the file system.
+    def _extract_member(
+            self,
+            member: zipfile.ZipInfo,
+            tpath: str,
+            pwd: Optional[bytes]) -> str:
 
-        Returns:
-            str: The full path to the extracted file.
-        """  # noqa: E501
         if self._is_windows:
             tpath = os.path.abspath(tpath)
             if tpath.startswith("\\\\"):
@@ -386,8 +386,8 @@ def create_addon_package(
     output_dir: str,
     files_mapping: List[FileMapping],
     log: logging.Logger
-):
-    log.info(f"Creating package for {ADDON_NAME}-{ADDON_VERSION}")      # noqa: G004
+) -> None:
+    log.info(f"Creating package for {ADDON_NAME}-{ADDON_VERSION}")  # noqa: G004
 
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(
@@ -434,7 +434,7 @@ def main(
         copy_client_code(output_dir, log)
         return
 
-    log.info(f"Preparing package for {ADDON_NAME}-{ADDON_VERSION}")       # noqa: G004
+    log.info(f"Preparing package for {ADDON_NAME}-{ADDON_VERSION}")  # noqa: G004
 
     if os.path.exists(FRONTEND_ROOT):
         build_frontend()

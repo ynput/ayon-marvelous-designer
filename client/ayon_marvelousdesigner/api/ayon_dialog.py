@@ -1,8 +1,6 @@
 """Ayon Marvelous Designer tools dialog module."""
 from __future__ import annotations
 
-from typing import Any
-
 import utility_api
 from ayon_core import resources, style
 from ayon_core.tools.utils import host_tools

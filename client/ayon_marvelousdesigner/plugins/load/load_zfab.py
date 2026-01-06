@@ -71,7 +71,7 @@ class LoadZfab(load.LoaderPlugin):
             "representation": context["representation"]["id"],
         })
 
-    def remove(self, container: dict) -> None:
+    def remove(self, container: dict) -> None:  # noqa: PLR6301
         """Remove loaded zfab from the scene."""
         fabric_index = container.get("fabricIndex")
         if fabric_index is not None:

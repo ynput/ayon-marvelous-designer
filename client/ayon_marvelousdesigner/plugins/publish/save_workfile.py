@@ -12,7 +12,7 @@ class SaveCurrentWorkfile(pyblish.api.ContextPlugin):
     order = pyblish.api.ExtractorOrder - 0.49
     hosts: ClassVar[list[str]] = ["marvelousdesigner"]
 
-    def process(self, context: pyblish.api.Context) -> None:  # noqa: PLR6301
+    def process(self, context: pyblish.api.Context) -> None:
         """Process the context to save the current workfile.
 
         Args:
