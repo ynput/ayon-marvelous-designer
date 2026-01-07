@@ -4,6 +4,7 @@ This module provides the CreateZFab creator class for generating
 zfab product instances in Marvelous Designer.
 """
 
+# Marvelous Designer Module API
 import fabric_api
 from ayon_core.lib import BoolDef
 from ayon_marvelousdesigner.api import plugin

@@ -3,6 +3,7 @@
 This module provides extractors for exporting geometry and animation data
 in various formats (Alembic, OBJ, FBX) from Marvelous Designer.
 """
+from __future__ import annotations
 
 import os
 from pathlib import Path
@@ -12,7 +13,19 @@ import ApiTypes
 import export_api
 import pyblish.api
 from ayon_core.pipeline import OptionalPyblishPluginMixin, publish
-from ayon_core.pipeline.publish import KnownPublishError
+from ayon_core.pipeline.publish import (
+    KnownPublishError,
+    add_trait_representations,
+)
+from ayon_core.pipeline.traits import (
+    FileLocation,
+    Geometry,
+    Persistent,
+    Representation,
+    Spatial,
+    Static,
+    TraitValidationError,
+)
 
 
 class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
@@ -20,8 +33,8 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
 
     order = pyblish.api.ExtractorOrder - 0.05
     label = "Extract PointCache (Alembic)"
-    hosts: ClassVar = ["marvelousdesigner"]
-    families: ClassVar = ["model", "pointcache"]
+    hosts: ClassVar[list[str]] = ["marvelousdesigner"]
+    families: ClassVar[list[str]] = ["model", "pointcache"]
     optional = True
     extension = "abc"
 
@@ -56,32 +69,60 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             raise KnownPublishError(
                 msg
             )
-
-        if "representations" not in instance.data:
-            instance.data["representations"] = []
-
-        representation = {
-            "name": self.extension,
-            "ext": self.extension,
-            "files": filename,
-            "stagingDir": stagingdir,
-        }
-
-        instance.data["representations"].append(representation)
-        self.log.info(
-            f"Extracted instance '{instance.name}' to: {filepath}"  # noqa: G004
+        up_axis = self.get_up_axis(export_option)
+        rep = Representation(
+            self.extension,
+            traits=[
+                Static(),
+                FileLocation(file_path=Path(stagingdir) / filename),
+                Persistent(),
+                Geometry(),
+                Spatial(
+                    up_axis=up_axis,
+                    handedness="right",
+                    meters_per_unit=export_option.scale / 100.0,
+                ),
+            ],
         )
 
+        try:
+            rep.validate()
+        except TraitValidationError as e:
+            msg = f"Representation {rep.name} is invalid: {e}"
+            self.log.exception(msg)
+        finally:
+            add_trait_representations(instance, [rep])
+
+        self.log.info(
+            "Extracted instance '%: %s' to: %s",
+            instance.name,
+            rep.name,
+            rep.get_trait(FileLocation).file_path)
+
         if os.path.exists(xml_output):
-            xml_representation = {
-                "name": "xml",
-                "ext": "xml",
-                "files": xml_filename,
-                "stagingDir": stagingdir,
-            }
-            instance.data["representations"].append(xml_representation)
+
+            xml_rep = Representation(
+                "xml",
+                traits=[
+                    Static(),
+                    FileLocation(file_path=Path(stagingdir) / xml_filename),
+                    Persistent(),
+                ],
+            )
+
+            try:
+                rep.validate()
+            except TraitValidationError as e:
+                msg = f"Representation {xml_rep.name} is invalid: {e}"
+                self.log.exception(msg)
+            finally:
+                add_trait_representations(instance, [xml_rep])
+
             self.log.info(
-                f"Extracted instance '{instance.name}' to: {filepath}"  # noqa: G004
+                "Extracted instance '%: %s' to: %s",
+                instance.name,
+                xml_rep.name,
+                xml_rep.get_trait(FileLocation).file_path,
             )
 
     def _export_mesh(
@@ -128,6 +169,26 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         export_option.bThin = options.get("bThin", False)
         export_option.bMetaData = options.get("bMetaData", True)
         return export_option
+
+    @staticmethod
+    def get_up_axis(
+            export_option: ApiTypes.ImportExportOption
+        ) -> str:
+        """Determine the up axis based on export options.
+
+        Args:
+            export_option (ApiTypes.ImportExportOption): Export options.
+
+        Returns:
+            str: The up axis ("Y" or "Z").
+        """
+        if export_option.axisY == 1:
+            return "Y"
+        if export_option.axisZ == 1:
+            return "Z"
+        if export_option.axisX == 1:
+            return "X"
+        return "Y"  # Default to Y if not specified
 
 
 class ExtractObj(ExtractPointCache):

@@ -20,13 +20,14 @@ if available.
 Package contains server side files directly,
 client side code zipped in `private` subfolder.
 """
+from __future__ import annotations
 
 import argparse
 import collections
 import io
 import logging
 import os
-import pathlib
+from pathlib import Path
 import platform
 import re
 import shutil
@@ -215,14 +216,15 @@ def update_client_version(logger: logging.Logger) -> None:
         return
 
     logger.info("Updating client version")
-    pathlib.Path(version_path).write_text(VERSION_PY_CONTENT, encoding="utf-8")
+    Path(version_path).write_text(VERSION_PY_CONTENT, encoding="utf-8")
 
 
 def build_frontend() -> None:
-    """Build frontend using yarn.
+    """Build frontend code using yarn.
 
     Raises:
-        RuntimeError: If yarn executable is not found or build fails.
+        RuntimeError: If yarn executable is not found or
+            if frontend build fails.
     """
     yarn_executable = _get_yarn_executable()
     if yarn_executable is None:
@@ -273,13 +275,10 @@ def get_client_files_mapping() -> List[Tuple[str, str]]:
 
 
 def get_client_zip_content(log: logging.Logger) -> io.BytesIO:
-    """Create a zip file containing client code.
-
-    Args:
-        log (logging.Logger): Logger object for logging messages.
+    """Get zipped client code as BytesIO stream.
 
     Returns:
-        io.BytesIO: In-memory zip file containing client code files.
+        io.BytesIO: In-memory zip file containing client code.
     """
     log.info("Preparing client code zip")
     files_mapping: List[Tuple[str, str]] = get_client_files_mapping()
@@ -292,11 +291,11 @@ def get_client_zip_content(log: logging.Logger) -> io.BytesIO:
 
 
 def get_base_files_mapping() -> List[FileMapping]:
-    """Get mapping of base files to copy for the addon package.
+    """Get base files mapping for server package.
 
     Returns:
-        List[FileMapping]: List of tuples with source file path (or BytesIO)
-            and destination subpath relative to package root.
+        List[FileMapping]: List of tuples with source file path and
+            destination subpath in package.
     """
     filepaths_to_copy: List[FileMapping] = [
         (
@@ -333,7 +332,7 @@ def copy_client_code(output_dir: str, log: logging.Logger) -> None:
 
     Args:
         output_dir (str): Output directory path.
-        log (logging.Logger): Logger object for logging messages.
+        log (logging.Logger): Logger object.
 
     """
     log.info(f"Copying client for {ADDON_NAME}-{ADDON_VERSION}")        # noqa: G004
@@ -366,14 +365,14 @@ def copy_addon_package(
         log (logging.Logger): Logger object.
 
     """
-    log.info(f"Copying package for {ADDON_NAME}-{ADDON_VERSION}")  # noqa: G004
+    log.info(f"Copying package for {ADDON_NAME}-{ADDON_VERSION}")     # noqa: G004
 
     # Add addon name and version to output directory
     addon_output_dir: str = os.path.join(
         output_dir, ADDON_NAME, ADDON_VERSION
     )
     if os.path.isdir(addon_output_dir):
-        log.info(f"Purging {addon_output_dir}")  # noqa: G004
+        log.info(f"Purging {addon_output_dir}")     # noqa: G004
         shutil.rmtree(addon_output_dir)
 
     os.makedirs(addon_output_dir, exist_ok=True)
@@ -384,7 +383,7 @@ def copy_addon_package(
         dst_dir: str = os.path.dirname(dst_path)
         os.makedirs(dst_dir, exist_ok=True)
         if isinstance(src_file, io.BytesIO):
-            pathlib.Path(dst_path).write_bytes(src_file.getvalue())
+            Path(dst_path).write_bytes(src_file.getvalue())
         else:
             safe_copy_file(src_file, dst_path)
 
@@ -460,8 +459,7 @@ def main(
 
     if only_client:
         if not has_client_code:
-            msg = "Client code is not available. Skipping"
-            raise RuntimeError(msg)
+            raise RuntimeError("Client code is not available. Skipping")  # noqa: EM101
 
         copy_client_code(output_dir, log)
         return
