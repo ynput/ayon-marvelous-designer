@@ -27,13 +27,13 @@ import collections
 import io
 import logging
 import os
-from pathlib import Path
 import platform
 import re
 import shutil
 import subprocess
 import sys
 import zipfile
+from pathlib import Path
 from typing import Iterable, List, Optional, Pattern, Tuple, Union
 
 import package
