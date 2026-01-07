@@ -45,7 +45,7 @@ class LoadZfab(load.LoaderPlugin):
         """
         file_path = self._get_filepath(context)
 
-        fabric_index = fabric_api.AddFabric(file_path.as_posix())
+        fabric_index = fabric_api.AddFabric(file_path)
         containerise(
             name=name,
             namespace=namespace,
@@ -103,6 +103,6 @@ class LoadZfab(load.LoaderPlugin):
             file_path: Path = representation.get_trait(FileLocation).file_path
         else:
             filepath = self.filepath_from_context(context)
-            file_path = Path(filepath)
+            file_path = Path(filepath).as_posix()
 
         return file_path

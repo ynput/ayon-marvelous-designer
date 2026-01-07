@@ -39,7 +39,7 @@ class LoadPointCache(load.LoaderPlugin):
         file_path = self._get_filepath(context)
         extension = file_path.suffix.lower()
         loaded_options = self.load_options(extension)
-        self.load_pointcache(file_path.as_posix(), extension, loaded_options)
+        self.load_pointcache(file_path, extension, loaded_options)
         containerise(
             name=name,
             namespace=namespace,
@@ -71,8 +71,6 @@ class LoadPointCache(load.LoaderPlugin):
         elif extension == ".obj":
             import_api.ImportOBJ(file_path, options)
         else:
-            msg = f"Unsupported pointcache format: {extension}"
-            raise LoadError(msg)
             msg = f"Unsupported pointcache format: {extension}"
             raise LoadError(msg)
 
@@ -126,6 +124,6 @@ class LoadPointCache(load.LoaderPlugin):
             file_path: Path = representation.get_trait(FileLocation).file_path
         else:
             filepath = self.filepath_from_context(context)
-            file_path = Path(filepath)
+            file_path = Path(filepath).as_posix()
 
         return file_path
