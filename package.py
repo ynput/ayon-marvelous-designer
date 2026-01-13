@@ -1,18 +1,9 @@
-# Required: lower case addon name e.g. 'deadline', otherwise addon
-#   will be invalid
 name = "marvelous_designer"
-
-# Optional: Addon title shown in UI, 'name' is used by default e.g. 'Deadline'
 title = "Marvelous Designer"
-
-# Required: Valid semantic version (https://semver.org/)
-version = "0.1.0"
-
-# Name of client code directory imported in AYON launcher
-app_host_name = "marvelousdesigner"
-# - do not specify if there is no client code
-
+version = "1.0.0"
 client_dir = "ayon_marvelousdesigner"
+app_host_name = "marvelousdesigner"
+
 project_can_override_addon_version = True
 
 # Version compatibility with AYON server
