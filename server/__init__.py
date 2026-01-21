@@ -6,11 +6,15 @@ from ayon_server.addons import BaseServerAddon
 from .settings import DEFAULT_MD_VALUES, MarvelousDesignerSettings
 
 
-class MarvelousDesignerAddon(BaseServerAddon):
+class MarvelousDesignerAddon(BaseServerAddon):  # noqa: RUF067
     """Add-on class for the server."""
     settings_model: Type[MarvelousDesignerSettings] = MarvelousDesignerSettings
 
     async def get_default_settings(self) -> MarvelousDesignerSettings:
-        """Return default settings."""
+        """Return default settings.
+
+        Returns:
+            MarvelousDesignerSettings: Default settings instance.
+        """
         settings_model_cls = self.get_settings_model()
         return settings_model_cls(**DEFAULT_MD_VALUES)
