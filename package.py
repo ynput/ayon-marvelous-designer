@@ -17,4 +17,6 @@ project_can_override_addon_version = True
 ayon_required_addons = {}
 # Mapping of addon name to version requirements
 # - if addon is used in the same bundle, the version range must be valid
-ayon_compatible_addons = {}
+ayon_compatible_addons = {
+    "core": ">=1.7.2",
+}
