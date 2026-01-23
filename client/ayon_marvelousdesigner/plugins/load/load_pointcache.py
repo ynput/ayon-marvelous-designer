@@ -6,6 +6,7 @@ formats (ABC, FBX, OBJ) into Marvelous Designer through the AYON pipeline.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import ClassVar, Optional, Union
 
@@ -37,7 +38,7 @@ class LoadPointCache(load.LoaderPlugin):
              options: Optional[dict] = None) -> None:
         """Load pointcache into the scene."""
         file_path = self._get_filepath(context)
-        extension = file_path.suffix.lower()
+        extension = os.path.splitext(file_path)[-1].lower()
         loaded_options = self.load_options(extension)
         self.load_pointcache(file_path, extension, loaded_options)
         containerise(
