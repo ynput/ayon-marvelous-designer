@@ -54,7 +54,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
 
         stagingdir = self.staging_dir(instance)
         filename = f"{instance.name}.{self.extension}"
-        xml_filename = f"{instance.name}.xml"
+        xml_filename = f"{instance.name}_meta_data.xml"
         filepath = Path(stagingdir) / filename
 
         xml_output = Path(stagingdir) / xml_filename
@@ -102,7 +102,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
         if os.path.exists(xml_output):
 
             xml_rep = Representation(
-                "xml",
+                f"{self.extension}_xml",
                 traits=[
                     Static(),
                     FileLocation(file_path=Path(stagingdir) / xml_filename),
