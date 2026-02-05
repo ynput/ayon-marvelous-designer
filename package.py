@@ -1,4 +1,4 @@
-name = "marvelousdesigner"
+name = "marvelous_designer"
 title = "Marvelous Designer"
 version = "1.0.1"
 
