@@ -110,7 +110,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             )
 
             try:
-                rep.validate()
+                xml_rep.validate()
             except TraitValidationError as e:
                 msg = f"Representation {xml_rep.name} is invalid: {e}"
                 self.log.exception(msg)
