@@ -15,8 +15,8 @@ class CreateZFab(plugin.MDCreator):
     """Model creator for Marvelous Designer."""
     identifier = "io.ayon.creators.marvelousdesigner.zfab"
     label = "Zfab"
-    product_type = "zfab"
     product_base_type = "zfab"
+    product_type = product_base_type
     icon = "picture-o"
 
     def create(self, product_name: str,

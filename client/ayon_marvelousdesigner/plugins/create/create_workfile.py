@@ -11,8 +11,8 @@ class CreateWorkfile(AutoCreator):
     """Workfile auto-creator."""
     identifier = "io.ayon.creators.marvelousdesigner.workfile"
     label = "Workfile"
-    product_type = "workfile"
     product_base_type = "workfile"
+    product_type = product_base_type
     icon = "document"
 
     default_variant = "Main"
@@ -56,6 +56,7 @@ class CreateWorkfile(AutoCreator):
                 task_entity=task_entity,
                 variant=variant,
                 host_name=host_name,
+                product_type=self.product_base_type,
             )
             data = {
                 "folderPath": folder_path,
@@ -76,6 +77,7 @@ class CreateWorkfile(AutoCreator):
                 task_entity=task_entity,
                 variant=variant,
                 host_name=host_name,
+                product_type=self.product_base_type,
             )
             current_instance["folderPath"] = folder_path
             current_instance["task"] = task_name
@@ -88,8 +90,11 @@ class CreateWorkfile(AutoCreator):
     def collect_instances(self) -> None:
         """Collect existing instances from MD and add them to the context."""
         for instance in get_instances_values():
-            if (instance.get("creator_identifier") == self.identifier or
-                    instance.get("productType") == self.product_type):
+            if (
+                instance.get("creator_identifier") == self.identifier
+                # Backwards compatibility
+                or instance.get("productType") == self.product_base_type
+            ):
                 self.create_instance_in_context_from_existing(instance)
 
     def update_instances(self, update_list: list) -> None:  # noqa: PLR6301
@@ -114,7 +119,8 @@ class CreateWorkfile(AutoCreator):
             CreatedInstance: The newly created instance.
         """
         instance = CreatedInstance(
-            product_type=self.product_type,
+            product_base_type=self.product_base_type,
+            product_type=self.product_base_type,
             product_name=product_name,
             data=data,
             creator=self
