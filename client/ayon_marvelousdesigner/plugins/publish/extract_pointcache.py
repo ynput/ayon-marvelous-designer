@@ -54,10 +54,8 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
 
         stagingdir = self.staging_dir(instance)
         filename = f"{instance.name}.{self.extension}"
-        xml_filename = f"{instance.name}_meta_data.xml"
         filepath = Path(stagingdir) / filename
 
-        xml_output = Path(stagingdir) / xml_filename
         export_option = self.export_option(instance)
 
         output_files = self._export_mesh(filepath.as_posix(), export_option)
@@ -98,7 +96,6 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             instance.name,
             rep.name,
             rep.get_trait(FileLocation).file_path)
-
 
     def _export_mesh(
             self,
@@ -213,6 +210,7 @@ class ExtractObj(ExtractPointCache):
                 xml_rep.name,
                 xml_rep.get_trait(FileLocation).file_path,
             )
+
 
 class ExtractFbx(ExtractPointCache):
     """Extract Geometry in FBX Format."""
