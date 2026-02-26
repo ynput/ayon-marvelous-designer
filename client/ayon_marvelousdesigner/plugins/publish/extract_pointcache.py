@@ -54,7 +54,7 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
 
         stagingdir = self.staging_dir(instance)
         filename = f"{instance.name}.{self.extension}"
-        xml_filename = f"{instance.name}.xml"
+        xml_filename = f"{instance.name}_meta_data.xml"
         filepath = Path(stagingdir) / filename
 
         xml_output = Path(stagingdir) / xml_filename
@@ -94,35 +94,11 @@ class ExtractPointCache(publish.Extractor, OptionalPyblishPluginMixin):
             add_trait_representations(instance, [rep])
 
         self.log.info(
-            "Extracted instance '%: %s' to: %s",
+            "Extracted instance '%s: %s' to: %s",
             instance.name,
             rep.name,
             rep.get_trait(FileLocation).file_path)
 
-        if self.extension == "obj" and os.path.exists(xml_output):
-            xml_rep = Representation(
-                f"{self.extension}_xml",
-                traits=[
-                    Static(),
-                    FileLocation(file_path=Path(stagingdir) / xml_filename),
-                    Persistent(),
-                ],
-            )
-
-            try:
-                xml_rep.validate()
-            except TraitValidationError as e:
-                msg = f"Representation {xml_rep.name} is invalid: {e}"
-                self.log.exception(msg)
-            finally:
-                add_trait_representations(instance, [xml_rep])
-
-            self.log.info(
-                "Extracted instance '%: %s' to: %s",
-                instance.name,
-                xml_rep.name,
-                xml_rep.get_trait(FileLocation).file_path,
-            )
 
     def _export_mesh(
             self,
@@ -195,7 +171,48 @@ class ExtractObj(ExtractPointCache):
 
     label = "Extract OBJ"
     extension = "obj"
+    def process(self, instance: pyblish.api.Instance) -> None:
+        """Process the instance to extract point cache data in OBJ format.
 
+        This method extends the base process method to handle additional
+        XML metadata extraction specific to OBJ exports.
+
+        Args:
+            instance (pyblish.api.Instance): The instance to process
+            for extraction.
+
+        """
+        super().process(instance)
+
+        stagingdir = self.staging_dir(instance)
+        xml_filename = f"{instance.name}_meta_data.xml"
+
+        xml_output = Path(stagingdir) / xml_filename
+        if os.path.exists(xml_output):
+            xml_rep = Representation(
+                "xml",
+                traits=[
+                    Static(),
+                    FileLocation(file_path=xml_output),
+                    Persistent(),
+                ],
+            )
+
+            try:
+                xml_rep.validate()
+
+            except TraitValidationError as e:
+                msg = f"Representation {xml_rep.name} is invalid: {e}"
+                self.log.exception(msg)
+            finally:
+                add_trait_representations(instance, [xml_rep])
+
+            self.log.info(
+                "Extracted instance '%s: %s' to: %s",
+                instance.name,
+                xml_rep.name,
+                xml_rep.get_trait(FileLocation).file_path,
+            )
 
 class ExtractFbx(ExtractPointCache):
     """Extract Geometry in FBX Format."""
