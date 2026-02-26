@@ -168,6 +168,7 @@ class ExtractObj(ExtractPointCache):
 
     label = "Extract OBJ"
     extension = "obj"
+
     def process(self, instance: pyblish.api.Instance) -> None:
         """Process the instance to extract point cache data in OBJ format.
 
