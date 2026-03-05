@@ -7,6 +7,44 @@ from ayon_server.settings import (
 )
 
 
+class ProductTypeItemModel(BaseSettingsModel):
+    _layout = "compact"
+    product_type: str = SettingsField(
+        title="Product type",
+        description="Product type name"
+    )
+    label: str = SettingsField(
+        "",
+        title="Label",
+        description="Label to show in UI for the product type"
+    )
+
+
+class BaseCreatePluginModel(BaseSettingsModel):
+    product_type_items: list[ProductTypeItemModel] = SettingsField(
+        default_factory=list,
+        title="Product type items",
+        description=(
+            "Optional list of product types this plugin can create. "
+        ),
+    )
+
+
+class CreatePluginsModel(BaseSettingsModel):
+    CreateModel: BaseCreatePluginModel = SettingsField(
+        title="Create Model",
+        defaul_factory=BaseCreatePluginModel,
+    )
+    CreatePointCache: BaseCreatePluginModel = SettingsField(
+        title="Create Point Cache",
+        defaul_factory=BaseCreatePluginModel,
+    )
+    CreateZFab: BaseCreatePluginModel = SettingsField(
+        title="Create Zfab",
+        defaul_factory=BaseCreatePluginModel,
+    )
+
+
 class BasicValidateModel(BaseSettingsModel):
     """Basic model for publisher settings validation."""
     enabled: bool = SettingsField(title="Enabled")
@@ -43,6 +81,10 @@ class MarvelousDesignerSettings(BaseSettingsModel):
     prelaunch_settings: PrelaunchModel = SettingsField(
         default_factory=PrelaunchModel,
         title="Prelaunch Settings"
+    )
+    create: CreatePluginsModel = SettingsField(
+        default_factory=CreatePluginsModel,
+        title="Create"
     )
     publish: PublishersModel = SettingsField(
         default_factory=PublishersModel,

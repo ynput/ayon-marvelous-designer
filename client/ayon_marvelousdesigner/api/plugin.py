@@ -33,8 +33,11 @@ class MDCreator(Creator):
         existing data.
         """
         for instance in get_instances_values():
-            if (instance.get("creator_identifier") == self.identifier or
-                    instance.get("productType") == self.product_type):
+            if (
+                instance.get("creator_identifier") == self.identifier
+                # Backwards compatibility
+                or instance.get("productType") == self.product_base_type
+            ):
                 self.create_instance_in_context_from_existing(instance)
 
     def update_instances(self, update_list: list) -> None:  # noqa: PLR6301
@@ -65,8 +68,12 @@ class MDCreator(Creator):
         Returns:
             CreatedInstance: The created instance.
         """
+        product_type = data.get("productType")
+        if not product_type:
+            product_type = self.product_base_type
         instance = CreatedInstance(
-            product_type=self.product_type,
+            product_base_type=self.product_base_type,
+            product_type=product_type,
             product_name=product_name,
             data=data,
             creator=self

@@ -20,7 +20,8 @@ from ayon_marvelousdesigner.api.pipeline import (
 
 class LoadZfab(load.LoaderPlugin):
     """Load ZFab for project."""
-    product_types: ClassVar[set[str]] = {"zfab"}
+    product_base_types: ClassVar[set[str]] = {"zfab"}
+    product_types: ClassVar[set[str]] = product_base_types
     representations: ClassVar[set[str]] = {"zfab"}
 
     label = "Load ZFab"
