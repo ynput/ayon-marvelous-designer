@@ -118,9 +118,12 @@ class CreateWorkfile(AutoCreator):
         Returns:
             CreatedInstance: The newly created instance.
         """
+        product_type = data.get("productType")
+        if not product_type:
+            product_type = self.product_base_type
         instance = CreatedInstance(
             product_base_type=self.product_base_type,
-            product_type=self.product_base_type,
+            product_type=product_type,
             product_name=product_name,
             data=data,
             creator=self
