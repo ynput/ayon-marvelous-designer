@@ -14,6 +14,15 @@ class BasicValidateModel(BaseSettingsModel):
     active: bool = SettingsField(title="Active")
 
 
+class LoadPointCacheModel(BaseSettingsModel):
+    """Model for Load Point Cache settings."""
+    scale: float = SettingsField(
+        default=1.0,
+        title="Scale",
+        description="Scale factor for loading point cache data."
+    )
+
+
 class PublishersModel(BaseSettingsModel):
     """Settings for publishers configuration."""
     ExtractPointCache: BasicValidateModel = SettingsField(
@@ -27,6 +36,15 @@ class PublishersModel(BaseSettingsModel):
     ExtractFbx: BasicValidateModel = SettingsField(
         default_factory=BasicValidateModel,
         title="Extract FBX"
+    )
+
+
+class LoadersModel(BaseSettingsModel):
+    """Settings for loaders configuration."""
+    # Placeholder for future loader settings
+    LoadPointCache: BasicValidateModel = SettingsField(
+        default_factory=BasicValidateModel,
+        title="Load Point Cache"
     )
 
 
@@ -47,6 +65,10 @@ class MarvelousDesignerSettings(BaseSettingsModel):
     publish: PublishersModel = SettingsField(
         default_factory=PublishersModel,
         title="Publishers"
+    )
+    load: LoadPointCacheModel = SettingsField(
+        default_factory=LoadPointCacheModel,
+        title="Loaders"
     )
 
 

@@ -12,6 +12,7 @@ from typing import ClassVar, Optional, Union
 
 import ApiTypes
 import import_api
+from ayon_core.lib import NumberDef
 from ayon_core.pipeline import load
 from ayon_core.pipeline.load import LoadError
 from ayon_core.pipeline.traits import (
@@ -30,6 +31,24 @@ class LoadPointCache(load.LoaderPlugin):
     order = -10
     icon = "code-fork"
     color = "orange"
+    scale = 1.0
+
+    @classmethod
+    def apply_settings(cls, project_settings):
+        # Apply import settings
+        settings = project_settings["marvelousdesigner"].get(
+            "load", {}).get("LoadPointCache", {})
+        cls.scale = settings.get("scale", 1.0)
+
+    @classmethod
+    def get_options(cls, contexts):
+        return [
+            NumberDef(
+                "scale",
+                label="Scale",
+                default=cls.scale,
+            )
+        ]
 
     def load(self,
              context: dict,
@@ -39,7 +58,7 @@ class LoadPointCache(load.LoaderPlugin):
         """Load pointcache into the scene."""
         file_path = self._get_filepath(context)
         extension = os.path.splitext(file_path)[-1].lower()
-        loaded_options = self.load_options(extension)
+        loaded_options = self.load_options(extension, options)
         self.load_pointcache(file_path, extension, loaded_options)
         containerise(
             name=name,
@@ -75,13 +94,14 @@ class LoadPointCache(load.LoaderPlugin):
             msg = f"Unsupported pointcache format: {extension}"
             raise LoadError(msg)
 
-    @staticmethod
-    def load_options(extension: str) -> Union[
+
+    def load_options(self, extension: str, options: Optional[dict] = None) -> Union[
             ApiTypes.ImportAlembicOption, ApiTypes.ImportExportOption]:
         """Return options for loading pointcache.
 
         Args:
             extension (str): Extension of pointcache file.
+            options (Optional[dict]): Additional options for loading.
 
         Returns:
             Union[
@@ -93,10 +113,16 @@ class LoadPointCache(load.LoaderPlugin):
 
         """
         if extension == ".abc":
-            return ApiTypes.ImportAlembicOption()
+            alembic_options = ApiTypes.ImportAlembicOption()
+            if options is not None:
+                alembic_options.aScale = options.get("scale", self.scale)
+            return alembic_options
 
         if extension in {".fbx", ".obj"}:
-            return ApiTypes.ImportExportOption()
+            export_options = ApiTypes.ImportExportOption()
+            if options is not None:
+                export_options.scale = options.get("scale", self.scale)
+            return export_options
 
         msg = f"Unsupported pointcache format: {extension}"
         raise LoadError(msg)
