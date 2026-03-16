@@ -42,8 +42,8 @@ class PublishersModel(BaseSettingsModel):
 class LoadersModel(BaseSettingsModel):
     """Settings for loaders configuration."""
     # Placeholder for future loader settings
-    LoadPointCache: BasicValidateModel = SettingsField(
-        default_factory=BasicValidateModel,
+    LoadPointCache: LoadPointCacheModel = SettingsField(
+        default_factory=LoadPointCacheModel,
         title="Load Point Cache"
     )
 
