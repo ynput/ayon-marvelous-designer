@@ -66,8 +66,8 @@ class MarvelousDesignerSettings(BaseSettingsModel):
         default_factory=PublishersModel,
         title="Publishers"
     )
-    load: LoadPointCacheModel = SettingsField(
-        default_factory=LoadPointCacheModel,
+    load: LoadersModel = SettingsField(
+        default_factory=LoadersModel,
         title="Loaders"
     )
 
