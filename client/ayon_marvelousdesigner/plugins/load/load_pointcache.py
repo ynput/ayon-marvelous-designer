@@ -34,14 +34,27 @@ class LoadPointCache(load.LoaderPlugin):
     scale = 1.0
 
     @classmethod
-    def apply_settings(cls, project_settings):
+    def apply_settings(cls, project_settings: dict) -> None:
+        """Apply project settings to the loader.
+
+        Args:
+            project_settings (dict): Project Settings
+        """
         # Apply import settings
         settings = project_settings["marvelousdesigner"].get(
             "load", {}).get("LoadPointCache", {})
         cls.scale = settings.get("scale", 1.0)
 
     @classmethod
-    def get_options(cls, contexts):
+    def get_options(cls, contexts: list[dict]) -> list[NumberDef]:  # noqa: ARG003
+        """Get loader options based on the provided contexts.
+
+        Args:
+            contexts (list[dict]): Context
+
+        Returns:
+            list[NumberDef]: List of number definitions for loader options.
+        """
         return [
             NumberDef(
                 "scale",
@@ -94,9 +107,9 @@ class LoadPointCache(load.LoaderPlugin):
             msg = f"Unsupported pointcache format: {extension}"
             raise LoadError(msg)
 
-
-    def load_options(self, extension: str, options: Optional[dict] = None) -> Union[
-            ApiTypes.ImportAlembicOption, ApiTypes.ImportExportOption]:
+    def load_options(
+            self, extension: str, options: Optional[dict] = None
+        ) -> Union[ApiTypes.ImportAlembicOption, ApiTypes.ImportExportOption]:
         """Return options for loading pointcache.
 
         Args:
