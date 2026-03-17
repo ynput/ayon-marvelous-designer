@@ -12,7 +12,7 @@ from ayon_marvelousdesigner.api.pipeline import (
 class MDCreator(Creator):
     """Marvelous Designer Creator."""
     settings_category = "marvelousdesigner"
-
+    skip_discovery = True
     def create(
             self, product_name: str,
             instance_data: dict, pre_create_data: dict
