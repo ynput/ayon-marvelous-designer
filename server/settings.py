@@ -33,15 +33,15 @@ class BaseCreatePluginModel(BaseSettingsModel):
 class CreatePluginsModel(BaseSettingsModel):
     CreateModel: BaseCreatePluginModel = SettingsField(
         title="Create Model",
-        defaul_factory=BaseCreatePluginModel,
+        default_factory=BaseCreatePluginModel,
     )
     CreatePointCache: BaseCreatePluginModel = SettingsField(
         title="Create Point Cache",
-        defaul_factory=BaseCreatePluginModel,
+        default_factory=BaseCreatePluginModel,
     )
     CreateZFab: BaseCreatePluginModel = SettingsField(
         title="Create Zfab",
-        defaul_factory=BaseCreatePluginModel,
+        default_factory=BaseCreatePluginModel,
     )
 
 
