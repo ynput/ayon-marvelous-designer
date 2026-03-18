@@ -13,10 +13,13 @@ class MDCreator(Creator):
     """Marvelous Designer Creator."""
     settings_category = "marvelous_designer"
     skip_discovery = True
+
     def create(
-            self, product_name: str,
-            instance_data: dict, pre_create_data: dict
-        ) -> None:
+        self,
+        product_name: str,
+        instance_data: dict,
+        pre_create_data: dict,
+    ) -> None:
         """Create a new instance in the current context."""
         instance = self.create_instance_in_context(product_name,
                                                    instance_data)
