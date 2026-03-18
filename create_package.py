@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Prepares server package from addon repo to upload to server.
 
 Requires Python 3.9. (Or at least 3.8+).
