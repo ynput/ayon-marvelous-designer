@@ -18,5 +18,5 @@ ayon_required_addons = {}
 # Mapping of addon name to version requirements
 # - if addon is used in the same bundle, the version range must be valid
 ayon_compatible_addons = {
-    "core": ">=1.7.2",
+    "core": ">=1.8.0",
 }

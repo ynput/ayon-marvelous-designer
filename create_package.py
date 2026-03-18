@@ -1,5 +1,3 @@
-#!/usr/bin/env python  # noqa: EXE001
-
 """Prepares server package from addon repo to upload to server.
 
 Requires Python 3.9. (Or at least 3.8+).
@@ -52,10 +50,10 @@ PRIVATE_ROOT: str = os.path.join(CURRENT_ROOT, "private")
 PUBLIC_ROOT: str = os.path.join(CURRENT_ROOT, "public")
 CLIENT_ROOT: str = os.path.join(CURRENT_ROOT, "client")
 
-VERSION_PY_CONTENT = f'''# -*- coding: utf-8 -*-
-"""Package declaring AYON addon '{ADDON_NAME}' version."""
-__version__ = "{ADDON_VERSION}"
-'''
+VERSION_PY_CONTENT = (
+    f'"""Package declaring AYON addon \'{ADDON_NAME}\' version."""\n'
+    f'__version__ = "{ADDON_VERSION}"\n'
+)
 
 # Patterns of directories to be skipped for server part of addon
 IGNORE_DIR_PATTERNS: List[Pattern] = [

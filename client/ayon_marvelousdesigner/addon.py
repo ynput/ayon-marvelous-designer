@@ -18,7 +18,7 @@ class MarvelousDesignerAddon(AYONAddon, IHostAddon):
     This addon provides host integration capabilities for Marvelous Designer,
     including launch hooks, environment setup, and workfile extensions.
     """
-    name = "marvelousdesigner"
+    name = "marvelous_designer"
     version = __version__
     host_name = "marvelousdesigner"
 

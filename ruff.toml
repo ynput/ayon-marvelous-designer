@@ -94,3 +94,7 @@ docstring-code-format = false
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 docstring-code-line-length = "dynamic"
+
+[lint.per-file-ignores]
+"server/settings.py" = ["D101"]
+"server/__init__.py" = ["RUF067"]

@@ -23,7 +23,8 @@ from ayon_marvelousdesigner.api.pipeline import containerise
 
 class LoadPointCache(load.LoaderPlugin):
     """Load Pointcache for project."""
-    product_types: ClassVar[set[str]] = {"*"}
+    product_base_types: ClassVar[set[str]] = {"*"}
+    product_types: ClassVar[set[str]] = product_base_types
     representations: ClassVar[set[str]] = {"abc", "fbx", "obj"}
 
     label = "Load Pointcache"
