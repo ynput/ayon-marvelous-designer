@@ -16,7 +16,7 @@ class CreateWorkfile(AutoCreator):
     icon = "document"
 
     default_variant = "Main"
-    settings_category = "marvelousdesigner"
+    settings_category = "marvelous_designer"
 
     def create(self) -> None:
         """Create or update the workfile instance in the current context."""
