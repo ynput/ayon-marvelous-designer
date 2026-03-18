@@ -21,10 +21,6 @@ class CreateWorkfile(AutoCreator):
     def create(self) -> None:
         """Create or update the workfile instance in the current context."""
         variant = self.default_variant
-        project_name = self.project_name
-        folder_path = self.create_context.get_current_folder_path()
-        task_name = self.create_context.get_current_task_name()
-        host_name = self.create_context.host_name
 
         # Workfile instance should always exist and must only exist once.
         # As such we'll first check if it already exists and is collected.
