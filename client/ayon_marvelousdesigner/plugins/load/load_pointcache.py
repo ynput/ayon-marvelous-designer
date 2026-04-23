@@ -31,6 +31,8 @@ class LoadPointCache(load.LoaderPlugin):
     order = -10
     icon = "code-fork"
     color = "orange"
+    # Settings
+    scale = 1.0
 
     def load(self,
              context: dict,
@@ -76,8 +78,7 @@ class LoadPointCache(load.LoaderPlugin):
             msg = f"Unsupported pointcache format: {extension}"
             raise LoadError(msg)
 
-    @staticmethod
-    def load_options(extension: str) -> Union[
+    def load_options(self, extension: str) -> Union[
             ApiTypes.ImportAlembicOption, ApiTypes.ImportExportOption]:
         """Return options for loading pointcache.
 
@@ -94,10 +95,14 @@ class LoadPointCache(load.LoaderPlugin):
 
         """
         if extension == ".abc":
-            return ApiTypes.ImportAlembicOption()
+            alembic_options = ApiTypes.ImportAlembicOption()
+            alembic_options.aScale = self.scale
+            return alembic_options
 
         if extension in {".fbx", ".obj"}:
-            return ApiTypes.ImportExportOption()
+            import_options = ApiTypes.ImportExportOption()
+            import_options.scale = self.scale
+            return import_options
 
         msg = f"Unsupported pointcache format: {extension}"
         raise LoadError(msg)
