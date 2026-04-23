@@ -7,12 +7,14 @@ This module provides:
 from __future__ import annotations
 
 import platform
-import shutil
 import subprocess
+import sys
+import zipfile
 from pathlib import Path
 from typing import ClassVar, Union
 
 from ayon_applications import LaunchTypes, PreLaunchHook
+from ayon_marvelousdesigner import MARVELOUS_DESIGNER_HOST_DIR
 
 
 class InstallQtBinding(PreLaunchHook):
@@ -25,12 +27,6 @@ class InstallQtBinding(PreLaunchHook):
     def execute(self) -> None:
         """Execute the pre-launch hook to install PySide6."""
         current_platform = platform.system().lower()
-        python_exe = (
-            "python"
-            if current_platform != "windows"
-            else "python.exe"
-        )
-        python_executable = Path(shutil.which(python_exe)).as_posix()
         md_setting = self.data["project_settings"]["marvelous_designer"]
         qt_binding_dir = md_setting["prelaunch_settings"].get(
             "qt_binding_dir", "")
@@ -40,11 +36,17 @@ class InstallQtBinding(PreLaunchHook):
                 "Qt binding directory '%s' does not exist.", qt_binding_dir
             )
             return
-
-        return_code = self.install_pyside(python_executable, qt_binding_dir)
+        if current_platform != "windows":
+            return_code = self.install_pyside(sys.executable, qt_binding_dir)
+        else:
+            return_code = self.extract_wheels(qt_binding_dir)
         if return_code:
             self.log.info("PySide6 installed successfully.")
             self.launch_context.env["QtDir"] = qt_binding_dir.as_posix()
+            plugin_dir = qt_binding_dir / "PySide6" / "plugins"
+            self.launch_context.env["QT_PLUGIN_PATH"] = (
+                plugin_dir.as_posix()
+            )
 
     def install_pyside(
             self, python_executable: str,
@@ -72,7 +74,9 @@ class InstallQtBinding(PreLaunchHook):
             "-m",
             "pip",
             "install",
-            "PySide6",
+            # we need to specify exact version of PySide6 to make sure
+            # it is binary compatible with Marvelous Designer's python version
+            "PySide6==6.10.1",
             "--target",
             qt_binding_dir.as_posix(),
             "--ignore-installed",
@@ -116,3 +120,26 @@ class InstallQtBinding(PreLaunchHook):
             return process.returncode == 0
 
         return None
+
+    def extract_wheels(self, qt_binding_dir: Path) -> bool:
+        """Extract wheel files in the specified directory.
+
+        Args:
+            qt_binding_dir (Path): The directory containing the wheel files
+                to extract.
+
+        Returns:
+            bool: True if extraction was successful, False otherwise.
+
+        """
+        wheel_dir = Path(MARVELOUS_DESIGNER_HOST_DIR) / "wheels"
+        try:
+            for wheel_file in wheel_dir.glob("*.whl"):
+                with zipfile.ZipFile(wheel_file, "r") as zip_ref:
+                    zip_ref.extractall(qt_binding_dir)
+
+        except Exception as error:
+            self.log.warning(
+                'Failed to extract wheel files: "%s".', error, exc_info=True)
+            return False
+        return True
