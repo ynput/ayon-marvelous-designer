@@ -25,7 +25,7 @@ _PYSIDE6_VERSION = "6.10.1"
 _PYSIDE6_WHEELS = [
     ("shiboken6", "shiboken6-6.10.1-cp39-abi3-win_amd64.whl"),
     ("PySide6", "pyside6-6.10.1-cp39-abi3-win_amd64.whl"),
-    ("PySide6-Essentials", "pyside6_essentials-6.10.1-cp39-abi3-win_amd64.whl"),
+    ("PySide6-Essentials", "pyside6_essentials-6.10.1-cp39-abi3-win_amd64.whl"),  # noqa: E501
     ("PySide6-Addons", "pyside6_addons-6.10.1-cp39-abi3-win_amd64.whl"),
 ]
 
