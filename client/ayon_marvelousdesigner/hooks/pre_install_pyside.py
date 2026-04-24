@@ -149,6 +149,12 @@ class InstallQtBinding(PreLaunchHook):
         tmp_dir = Path(tempfile.mkdtemp(prefix="ayon_pyside6_"))
         try:
             for package, wheel_filename in _PYSIDE6_WHEELS:
+                if (qt_binding_dir / wheel_filename).exists():
+                    self.log.info(
+                        "Wheel '%s' already exists, skipping download.",
+                        wheel_filename
+                    )
+                    continue
                 self.log.info("Downloading %s ...", wheel_filename)
                 wheel_path = self._download_wheel_from_pypi(
                     package, _PYSIDE6_VERSION, wheel_filename, tmp_dir
