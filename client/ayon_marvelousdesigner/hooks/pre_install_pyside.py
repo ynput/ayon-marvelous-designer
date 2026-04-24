@@ -151,8 +151,8 @@ class InstallQtBinding(PreLaunchHook):
             for package, wheel_filename in _PYSIDE6_WHEELS:
                 if (qt_binding_dir / wheel_filename).exists():
                     self.log.info(
-                        "Wheel '%s' already exists, skipping download.",
-                        wheel_filename
+                        "Wheel '%s' already exists in %s, skipping download.",
+                        wheel_filename, qt_binding_dir
                     )
                     continue
                 self.log.info("Downloading %s ...", wheel_filename)
