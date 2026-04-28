@@ -6,13 +6,26 @@ This module provides:
 """
 from __future__ import annotations
 
-import platform
+import json
 import shutil
 import subprocess
+import tempfile
+import urllib.request
+import zipfile
 from pathlib import Path
 from typing import ClassVar, Union
 
 from ayon_applications import LaunchTypes, PreLaunchHook
+
+# PySide6 wheels to download from PyPI for Windows (cp39 abi3 win_amd64).
+# Must stay in dependency order: shiboken6 first, then PySide6 core.
+_PYSIDE6_VERSION = "6.10.1"
+_PYSIDE6_WHEELS = [
+    ("shiboken6", f"shiboken6-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),
+    ("PySide6", f"pyside6-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),
+    ("PySide6-Essentials", f"pyside6_essentials-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),  # noqa: E501
+    ("PySide6-Addons", f"pyside6_addons-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),       # noqa: E501
+]
 
 
 class InstallQtBinding(PreLaunchHook):
@@ -24,13 +37,6 @@ class InstallQtBinding(PreLaunchHook):
 
     def execute(self) -> None:
         """Execute the pre-launch hook to install PySide6."""
-        current_platform = platform.system().lower()
-        python_exe = (
-            "python"
-            if current_platform != "windows"
-            else "python.exe"
-        )
-        python_executable = Path(shutil.which(python_exe)).as_posix()
         md_setting = self.data["project_settings"]["marvelous_designer"]
         qt_binding_dir = md_setting["prelaunch_settings"].get(
             "qt_binding_dir", "")
@@ -41,10 +47,14 @@ class InstallQtBinding(PreLaunchHook):
             )
             return
 
-        return_code = self.install_pyside(python_executable, qt_binding_dir)
+        return_code = self.extract_wheels(qt_binding_dir)
         if return_code:
             self.log.info("PySide6 installed successfully.")
             self.launch_context.env["QtDir"] = qt_binding_dir.as_posix()
+            plugin_dir = qt_binding_dir / "PySide6" / "plugins"
+            self.launch_context.env["QT_PLUGIN_PATH"] = (
+                plugin_dir.as_posix()
+            )
 
     def install_pyside(
             self, python_executable: str,
@@ -72,7 +82,9 @@ class InstallQtBinding(PreLaunchHook):
             "-m",
             "pip",
             "install",
-            "PySide6",
+            # we need to specify exact version of PySide6 to make sure
+            # it is binary compatible with Marvelous Designer's python version
+            f"PySide6=={_PYSIDE6_VERSION}",
             "--target",
             qt_binding_dir.as_posix(),
             "--ignore-installed",
@@ -116,3 +128,70 @@ class InstallQtBinding(PreLaunchHook):
             return process.returncode == 0
 
         return None
+
+    def extract_wheels(self, qt_binding_dir: Path) -> bool:
+        """Download PySide6 wheels from PyPI to a temp dir and extract them.
+
+        Args:
+            qt_binding_dir (Path): The directory to extract wheel contents
+                into.
+
+        Returns:
+            bool: True if all wheels were downloaded and extracted
+                successfully, False otherwise.
+
+        """
+        tmp_dir = Path(tempfile.mkdtemp(prefix="ayon_pyside6_"))
+        try:
+            for package, wheel_filename in _PYSIDE6_WHEELS:
+                if (qt_binding_dir / wheel_filename).exists():
+                    self.log.info(
+                        "Wheel '%s' already exists in %s, skipping download.",
+                        wheel_filename, qt_binding_dir
+                    )
+                    continue
+                self.log.info("Downloading %s ...", wheel_filename)
+                wheel_path = self._download_wheel_from_pypi(
+                    package, _PYSIDE6_VERSION, wheel_filename, tmp_dir
+                )
+                with zipfile.ZipFile(wheel_path, "r") as zip_ref:
+                    zip_ref.extractall(qt_binding_dir)
+                self.log.info("Extracted %s", wheel_filename)
+        except Exception as error:
+            self.log.warning(
+                'Failed to download/extract wheels: "%s".', error,
+                exc_info=True)
+            return False
+        finally:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+        return True
+
+    @staticmethod
+    def _download_wheel_from_pypi(
+            package: str, version: str,
+            wheel_filename: str, dest_dir: Path) -> Path:
+        """Download a specific wheel from PyPI using the JSON API.
+
+        Args:
+            package (str): PyPI package name.
+            version: Exact version string.
+            wheel_filename: Expected wheel filename to locate in the release.
+            dest_dir: Directory to save the downloaded wheel.
+
+        Returns:
+            Path: Path to the downloaded wheel file.
+
+        """  # noqa: DOC501
+        api_url = f"https://pypi.org/pypi/{package}/{version}/json"
+        with urllib.request.urlopen(api_url, timeout=60) as resp:
+            data = json.loads(resp.read())
+        for url_info in data.get("urls", []):
+            if url_info["filename"] == wheel_filename:
+                dest = dest_dir / wheel_filename
+                urllib.request.urlretrieve(url_info["url"], dest)  # noqa: S310
+                return dest
+        msg = (
+            f"Wheel '{wheel_filename}' not found for "
+            f"{package}=={version} on PyPI"
+        )
+        raise FileNotFoundError(msg)
