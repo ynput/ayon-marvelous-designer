@@ -7,10 +7,8 @@ This module provides:
 from __future__ import annotations
 
 import json
-import platform
 import shutil
 import subprocess
-import sys
 import tempfile
 import urllib.request
 import zipfile
@@ -23,10 +21,10 @@ from ayon_applications import LaunchTypes, PreLaunchHook
 # Must stay in dependency order: shiboken6 first, then PySide6 core.
 _PYSIDE6_VERSION = "6.10.1"
 _PYSIDE6_WHEELS = [
-    ("shiboken6", "shiboken6-6.10.1-cp39-abi3-win_amd64.whl"),
-    ("PySide6", "pyside6-6.10.1-cp39-abi3-win_amd64.whl"),
-    ("PySide6-Essentials", "pyside6_essentials-6.10.1-cp39-abi3-win_amd64.whl"),  # noqa: E501
-    ("PySide6-Addons", "pyside6_addons-6.10.1-cp39-abi3-win_amd64.whl"),
+    ("shiboken6", f"shiboken6-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),
+    ("PySide6", f"pyside6-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),
+    ("PySide6-Essentials", f"pyside6_essentials-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),  # noqa: E501
+    ("PySide6-Addons", f"pyside6_addons-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),       # noqa: E501
 ]
 
 
@@ -39,7 +37,6 @@ class InstallQtBinding(PreLaunchHook):
 
     def execute(self) -> None:
         """Execute the pre-launch hook to install PySide6."""
-        current_platform = platform.system().lower()
         md_setting = self.data["project_settings"]["marvelous_designer"]
         qt_binding_dir = md_setting["prelaunch_settings"].get(
             "qt_binding_dir", "")
@@ -49,10 +46,8 @@ class InstallQtBinding(PreLaunchHook):
                 "Qt binding directory '%s' does not exist.", qt_binding_dir
             )
             return
-        if current_platform != "windows":
-            return_code = self.install_pyside(sys.executable, qt_binding_dir)
-        else:
-            return_code = self.extract_wheels(qt_binding_dir)
+
+        return_code = self.extract_wheels(qt_binding_dir)
         if return_code:
             self.log.info("PySide6 installed successfully.")
             self.launch_context.env["QtDir"] = qt_binding_dir.as_posix()
@@ -89,7 +84,7 @@ class InstallQtBinding(PreLaunchHook):
             "install",
             # we need to specify exact version of PySide6 to make sure
             # it is binary compatible with Marvelous Designer's python version
-            "PySide6==6.10.1",
+            f"PySide6=={_PYSIDE6_VERSION}",
             "--target",
             qt_binding_dir.as_posix(),
             "--ignore-installed",
