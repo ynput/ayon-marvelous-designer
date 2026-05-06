@@ -1,14 +1,16 @@
 """Pre-launch hook for installing Qt bindings in Marvelous Designer.
 
 This module provides:
-- InstallQtBinding: Pre-launch hook that installs PySide6 to MD's
+InstallQtBinding: Pre-launch hook that installs PySide6 to MD's
   Python environment to enable Qt-based functionality.
 """
 from __future__ import annotations
 
 import json
+import platform
 import shutil
 import subprocess
+import sys
 import tempfile
 import urllib.request
 import zipfile
@@ -17,14 +19,14 @@ from typing import ClassVar, Union
 
 from ayon_applications import LaunchTypes, PreLaunchHook
 
-# PySide6 wheels to download from PyPI for Windows (cp39 abi3 win_amd64).
+# PySide6 packages to download from PyPI.
 # Must stay in dependency order: shiboken6 first, then PySide6 core.
 _PYSIDE6_VERSION = "6.10.1"
-_PYSIDE6_WHEELS = [
-    ("shiboken6", f"shiboken6-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),
-    ("PySide6", f"pyside6-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),
-    ("PySide6-Essentials", f"pyside6_essentials-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),  # noqa: E501
-    ("PySide6-Addons", f"pyside6_addons-{_PYSIDE6_VERSION}-cp39-abi3-win_amd64.whl"),       # noqa: E501
+_PYSIDE6_PACKAGES = [
+    "shiboken6",
+    "PySide6",
+    "PySide6-Essentials",
+    "PySide6-Addons",
 ]
 
 
@@ -143,16 +145,10 @@ class InstallQtBinding(PreLaunchHook):
         """
         tmp_dir = Path(tempfile.mkdtemp(prefix="ayon_pyside6_"))
         try:
-            for package, wheel_filename in _PYSIDE6_WHEELS:
-                if (qt_binding_dir / wheel_filename).exists():
-                    self.log.info(
-                        "Wheel '%s' already exists in %s, skipping download.",
-                        wheel_filename, qt_binding_dir
-                    )
-                    continue
-                self.log.info("Downloading %s ...", wheel_filename)
-                wheel_path = self._download_wheel_from_pypi(
-                    package, _PYSIDE6_VERSION, wheel_filename, tmp_dir
+            for package in _PYSIDE6_PACKAGES:
+                self.log.info("Resolving compatible wheel for %s ...", package)
+                wheel_path, wheel_filename = self._download_wheel_from_pypi(
+                    package, _PYSIDE6_VERSION, tmp_dir
                 )
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
                     zip_ref.extractall(qt_binding_dir)
@@ -169,29 +165,112 @@ class InstallQtBinding(PreLaunchHook):
     @staticmethod
     def _download_wheel_from_pypi(
             package: str, version: str,
-            wheel_filename: str, dest_dir: Path) -> Path:
-        """Download a specific wheel from PyPI using the JSON API.
+            dest_dir: Path) -> tuple[Path, str]:
+        """Download a compatible wheel from PyPI using the JSON API.
 
         Args:
             package (str): PyPI package name.
             version: Exact version string.
-            wheel_filename: Expected wheel filename to locate in the release.
             dest_dir: Directory to save the downloaded wheel.
 
         Returns:
-            Path: Path to the downloaded wheel file.
+            tuple[Path, str]: Downloaded wheel path and wheel filename.
 
-        """  # noqa: DOC501
+        """
         api_url = f"https://pypi.org/pypi/{package}/{version}/json"
         with urllib.request.urlopen(api_url, timeout=60) as resp:
             data = json.loads(resp.read())
-        for url_info in data.get("urls", []):
-            if url_info["filename"] == wheel_filename:
-                dest = dest_dir / wheel_filename
-                urllib.request.urlretrieve(url_info["url"], dest)  # noqa: S310
-                return dest
-        msg = (
-            f"Wheel '{wheel_filename}' not found for "
-            f"{package}=={version} on PyPI"
+        wheel_url_info = InstallQtBinding._select_compatible_wheel_url(
+            package, version, data.get("urls", [])
         )
-        raise FileNotFoundError(msg)
+        wheel_filename = wheel_url_info["filename"]
+        dest = dest_dir / wheel_filename
+        urllib.request.urlretrieve(wheel_url_info["url"], dest)  # noqa: S310
+        return dest, wheel_filename
+
+    @staticmethod
+    def _select_compatible_wheel_url(
+            package: str, version: str, urls: list[dict]) -> dict:
+        """Pick the best matching wheel entry for the current OS/arch.
+
+        Args:
+            package: PyPI package name.
+            version: Exact version string.
+            urls: List of URL info dicts from PyPI JSON API.
+
+        Returns:
+            dict: The URL info dict for the best matching wheel.
+
+        Raises:
+            FileNotFoundError: If no compatible wheel is found.
+        """
+        normalized_package = package.lower().replace("-", "_")
+        prefix = f"{normalized_package}-{version}-cp39-abi3-"
+
+        candidates = [
+            url_info
+            for url_info in urls
+            if url_info.get("packagetype") == "bdist_wheel"
+            and url_info.get("filename", "").lower().startswith(prefix)
+        ]
+
+        if not candidates:
+            msg = (
+                f"No cp39-abi3 wheel candidates found for "
+                f"{package}=={version} on PyPI"
+            )
+            raise FileNotFoundError(msg)
+
+        platform_key = sys.platform
+        machine = platform.machine().lower()
+
+        preferred_tags = InstallQtBinding._preferred_tags(
+            platform_key, machine
+        )
+
+        def _score(filename: str) -> int:
+            lowered = filename.lower()
+            score = 0
+            for tag in preferred_tags:
+                if tag in lowered:
+                    score += 1
+            return score
+
+        best = max(
+            candidates,
+            key=lambda url_info: _score(url_info["filename"]),
+        )
+        if _score(best["filename"]) == 0:
+            available = ", ".join(
+                url_info["filename"] for url_info in candidates
+            )
+            msg = (
+                f"No compatible wheel found for {package}=={version} on "
+                f"platform={platform_key}, arch={machine}. "
+                f"Available: {available}"
+            )
+            raise FileNotFoundError(msg)
+
+        return best
+
+    @staticmethod
+    def _preferred_tags(platform_key: str, machine: str) -> list[str]:
+        """Return tag preferences for selecting a platform-specific wheel.
+
+        Raises:
+            RuntimeError: If the platform is unsupported.
+
+        """
+        if platform_key.startswith("win"):
+            return ["win_amd64"]
+        if platform_key.startswith("linux"):
+            if machine in {"aarch64", "arm64"}:
+                return ["manylinux", "aarch64", "arm64"]
+            return ["manylinux", "x86_64", "amd64"]
+        if platform_key == "darwin":
+            if machine in {"arm64", "aarch64"}:
+                return ["macosx", "universal2", "arm64"]
+            return ["macosx", "universal2", "x86_64"]
+
+        msg = f"Unsupported platform for wheel selection: {platform_key}"
+        raise RuntimeError(msg)
