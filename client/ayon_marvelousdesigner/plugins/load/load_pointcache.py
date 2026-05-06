@@ -31,9 +31,18 @@ class LoadPointCache(load.LoaderPlugin):
     order = -10
     icon = "code-fork"
     color = "orange"
-    settings_category = "marvelous_designer"
     # Settings
     scale = 1.0
+
+    @classmethod
+    def apply_settings(cls, project_settings: dict) -> None:
+        """Apply settings from project settings."""
+        md_load_setting = (
+            project_settings["marvelous_designer"]
+                            ["load"]
+                            ["LoadPointCache"]
+        )
+        cls.scale = md_load_setting.get("scale", cls.scale)
 
     def load(self,
              context: dict,
