@@ -146,6 +146,16 @@ class InstallQtBinding(PreLaunchHook):
         tmp_dir = Path(tempfile.mkdtemp(prefix="ayon_pyside6_"))
         try:
             for package in _PYSIDE6_PACKAGES:
+                if self._is_package_extracted(
+                    qt_binding_dir, package, _PYSIDE6_VERSION
+                ):
+                    self.log.info(
+                        "%s==%s already extracted, skipping.",
+                        package,
+                        _PYSIDE6_VERSION,
+                    )
+                    continue
+
                 self.log.info("Resolving compatible wheel for %s ...", package)
                 wheel_path, wheel_filename = self._download_wheel_from_pypi(
                     package, _PYSIDE6_VERSION, tmp_dir
@@ -161,6 +171,29 @@ class InstallQtBinding(PreLaunchHook):
         finally:
             shutil.rmtree(tmp_dir, ignore_errors=True)
         return True
+
+    @staticmethod
+    def _is_package_extracted(
+            qt_binding_dir: Path, package: str, version: str) -> bool:
+        """Return whether a package/version appears to already be extracted.
+
+        Args:
+            qt_binding_dir(Path): Directory where the package is extracted.
+            package (str): PyPI package name.
+            version (str): Exact version string.
+
+        Returns:
+            bool: True if the package appears to be already extracted,
+                False otherwise.
+        """
+        normalized = package.lower().replace("-", "_")
+        dist_info_name = f"{normalized}-{version}.dist-info"
+
+        for path in qt_binding_dir.glob("*.dist-info"):
+            if path.name.lower() == dist_info_name:
+                return True
+
+        return False
 
     @staticmethod
     def _download_wheel_from_pypi(
