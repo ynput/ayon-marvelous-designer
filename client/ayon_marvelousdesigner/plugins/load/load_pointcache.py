@@ -31,6 +31,7 @@ class LoadPointCache(load.LoaderPlugin):
     order = -10
     icon = "code-fork"
     color = "orange"
+    settings_category = "marvelous_designer"
     # Settings
     scale = 1.0
 
@@ -107,7 +108,7 @@ class LoadPointCache(load.LoaderPlugin):
         msg = f"Unsupported pointcache format: {extension}"
         raise LoadError(msg)
 
-    def _get_filepath(self, context: dict) -> Path:
+    def _get_filepath(self, context: dict) -> str:
         """Gets filepath with either representation trait or context data.
 
         For backward compatibility only.
@@ -116,7 +117,7 @@ class LoadPointCache(load.LoaderPlugin):
             context (dict): Context dictionary.
 
         Returns:
-            Path: File path to load.
+            str: File path to load.
 
         """
         traits_raw = context["representation"].get("traits")
@@ -131,6 +132,6 @@ class LoadPointCache(load.LoaderPlugin):
             file_path: Path = representation.get_trait(FileLocation).file_path
         else:
             filepath = self.filepath_from_context(context)
-            file_path = Path(filepath).as_posix()
+            file_path = Path(filepath)
 
-        return file_path
+        return file_path.as_posix()
