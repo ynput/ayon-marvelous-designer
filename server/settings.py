@@ -74,6 +74,15 @@ class PrelaunchModel(BaseSettingsModel):
         default="",
         title="Qt Binding Directory"
     )
+    plugins_dir: str = SettingsField(
+        default="",
+        title="Plugins Directory",
+        description=(
+            "Directory where the pluginSettings.json file is located. "
+            "This is used to add the AYON plugin to Marvelous Designer's "
+            "plugin system."
+        )
+    )
 
 
 class MarvelousDesignerSettings(BaseSettingsModel):
@@ -95,6 +104,7 @@ class MarvelousDesignerSettings(BaseSettingsModel):
 DEFAULT_MD_VALUES: dict[str, Any] = {
     "prelaunch_settings": {
         "qt_binding_dir": "/Users/Public/Documents/MarvelousDesigner/Configuration/python311/Lib/site-packages",  # noqa: E501
+        "plugins_dir": "/Users/Public/Documents/MarvelousDesigner/Configuration/Plugins",  # noqa: E501
     },
     "publish": {
         "ExtractPointCache": {
