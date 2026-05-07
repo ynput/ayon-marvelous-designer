@@ -31,6 +31,18 @@ class LoadPointCache(load.LoaderPlugin):
     order = -10
     icon = "code-fork"
     color = "orange"
+    # Settings
+    scale = 1.0
+
+    @classmethod
+    def apply_settings(cls, project_settings: dict) -> None:
+        """Apply settings from project settings."""
+        md_load_setting = (
+            project_settings["marvelous_designer"]
+                            ["load"]
+                            ["LoadPointCache"]
+        )
+        cls.scale = md_load_setting.get("scale", cls.scale)
 
     def load(self,
              context: dict,
@@ -76,8 +88,7 @@ class LoadPointCache(load.LoaderPlugin):
             msg = f"Unsupported pointcache format: {extension}"
             raise LoadError(msg)
 
-    @staticmethod
-    def load_options(extension: str) -> Union[
+    def load_options(self, extension: str) -> Union[
             ApiTypes.ImportAlembicOption, ApiTypes.ImportExportOption]:
         """Return options for loading pointcache.
 
@@ -94,15 +105,19 @@ class LoadPointCache(load.LoaderPlugin):
 
         """
         if extension == ".abc":
-            return ApiTypes.ImportAlembicOption()
+            alembic_options = ApiTypes.ImportAlembicOption()
+            alembic_options.aScale = self.scale
+            return alembic_options
 
         if extension in {".fbx", ".obj"}:
-            return ApiTypes.ImportExportOption()
+            import_options = ApiTypes.ImportExportOption()
+            import_options.scale = self.scale
+            return import_options
 
         msg = f"Unsupported pointcache format: {extension}"
         raise LoadError(msg)
 
-    def _get_filepath(self, context: dict) -> Path:
+    def _get_filepath(self, context: dict) -> str:
         """Gets filepath with either representation trait or context data.
 
         For backward compatibility only.
@@ -111,7 +126,7 @@ class LoadPointCache(load.LoaderPlugin):
             context (dict): Context dictionary.
 
         Returns:
-            Path: File path to load.
+            str: File path to load.
 
         """
         traits_raw = context["representation"].get("traits")
@@ -126,6 +141,6 @@ class LoadPointCache(load.LoaderPlugin):
             file_path: Path = representation.get_trait(FileLocation).file_path
         else:
             filepath = self.filepath_from_context(context)
-            file_path = Path(filepath).as_posix()
+            file_path = Path(filepath)
 
-        return file_path
+        return file_path.as_posix()
