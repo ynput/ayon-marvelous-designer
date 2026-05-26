@@ -27,22 +27,30 @@ class CreateTempZprjFile(PreLaunchHook):
 
     def execute(self) -> None:
         """Execute the pre-launch hook to create temp zprj file."""
-        last_workfile = self.data.get("last_workfile_path")
-        if self.data.get("start_last_workfile")  \
-            and last_workfile  \
-                and os.path.exists(last_workfile):
-            self.log.info("It is set to start last workfile on start.")
-        else:
-            source_template_file = os.path.join(
-                MARVELOUS_DESIGNER_HOST_DIR, "default_zprj", "Untitled_MD.zprj"
-            )
-            staging_dir = tempdir.get_temp_dir(
-                self.data["project_name"],
-                use_local_temp=True
-            )
-            spm_filename = os.path.basename(source_template_file)
-            last_workfile = os.path.join(staging_dir, spm_filename)
-            shutil.copyfile(source_template_file, last_workfile)
-            self.launch_context.env["AYON_TEMP_DIR"] = staging_dir
+        workfile_path = self.get_workfile_path()
 
-        self.launch_context.launch_args.append(last_workfile)
+        self.launch_context.launch_args.append(workfile_path)
+
+    def get_workfile_path(self) -> str:
+        workfile_path = self.data.get("workfile_path")
+        if workfile_path:
+            return workfile_path
+
+        if self.data.get("start_last_workfile"):
+            self.log.info("It is set to start last workfile on start.")
+            last_workfile = self.data.get("last_workfile_path")
+            if last_workfile and os.path.exists(last_workfile):
+                return last_workfile
+
+        source_template_file = os.path.join(
+            MARVELOUS_DESIGNER_HOST_DIR, "default_zprj", "Untitled_MD.zprj"
+        )
+        staging_dir = tempdir.get_temp_dir(
+            self.data["project_name"],
+            use_local_temp=True
+        )
+        spm_filename = os.path.basename(source_template_file)
+        workfile_path = os.path.join(staging_dir, spm_filename)
+        shutil.copyfile(source_template_file, workfile_path)
+        self.launch_context.env["AYON_TEMP_DIR"] = staging_dir
+        return workfile_path
