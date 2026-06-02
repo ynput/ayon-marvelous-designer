@@ -1,6 +1,6 @@
 name = "marvelous_designer"
 title = "Marvelous Designer"
-version = "1.1.3"
+version = "1.1.3+dev"
 
 client_dir = "ayon_marvelousdesigner"
 app_host_name = "marvelousdesigner"
