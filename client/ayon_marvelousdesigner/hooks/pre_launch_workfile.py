@@ -32,6 +32,11 @@ class CreateTempZprjFile(PreLaunchHook):
         self.launch_context.launch_args.append(workfile_path)
 
     def get_workfile_path(self) -> str:
+        """Get the path to the workfile.
+
+        Returns:
+            str: The path to the workfile to be used for the launch.
+        """
         workfile_path = self.data.get("workfile_path")
         if workfile_path:
             return workfile_path
