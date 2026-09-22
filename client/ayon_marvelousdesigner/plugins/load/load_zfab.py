@@ -70,7 +70,11 @@ class LoadZfab(load.LoaderPlugin):
             fabric_api.ReplaceFabric(fabric_index, file_path.as_posix())
         imprint(container["objectName"], {
             "representation": context["representation"]["id"],
+            "project_name": context["project"]["name"],
         })
+
+    def switch(self, container, context):
+        self.update(container, context)
 
     def remove(self, container: dict) -> None:  # noqa: PLR6301
         """Remove loaded zfab from the scene."""
