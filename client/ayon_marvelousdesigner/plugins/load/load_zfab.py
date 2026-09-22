@@ -73,6 +73,9 @@ class LoadZfab(load.LoaderPlugin):
             "project_name": context["project"]["name"],
         })
 
+    def switch(self, container, context):
+        self.update(container, context)
+
     def remove(self, container: dict) -> None:  # noqa: PLR6301
         """Remove loaded zfab from the scene."""
         fabric_index = container.get("fabricIndex")
