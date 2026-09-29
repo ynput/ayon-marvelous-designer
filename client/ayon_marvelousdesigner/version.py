@@ -1,2 +1,2 @@
 """Package declaring AYON addon 'marvelous_designer' version."""
-__version__ = "1.1.4"
+__version__ = "1.1.4+dev"
